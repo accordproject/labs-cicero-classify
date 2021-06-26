@@ -140,3 +140,5 @@ checkpoint*
 *_epc/
 cached_*
 *.csv
+*.tsv
+*.zip
