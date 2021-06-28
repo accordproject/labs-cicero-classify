@@ -114,3 +114,82 @@ If this work, I will start to label the data I get from contract templates.
 3. Discuss to find out the label scructure we want model to predict.
 4. Learn Snorkel
 
+## Week 3 (06/21 - 06/27)
+
+### 6/21
+
+
+#### Custom Model
+I keep learning to use PyTorch to decompose the model. I want the NER model behave as the picture shown below.
+
+<img src="https://i.imgur.com/WzxFujn.png" height="300">
+
+
+#### Meeting
+I have the weekly meeting with my Mentor, Niall. And Walter join the meeting, too, who discuss NER model with us. ([Meeting Note](https://hackmd.io/@EasonC/HyHlZOpou))
+
+### 6/22 - 6/23
+
+#### Prepare presentation
+
+I prepare the presentation on WG meeting at 6/24 (UTC+8).
+
+### 6/24
+
+#### Accord Project Tech Working Group Meeting
+
+Meeting Recording (My part start after 41:15): https://vimeo.com/566926468
+
+Eventhough my network is out at 31:00, I luckly pre-record the presentation video to prevent me from oversleep. So I give Jerome the video link then use the time playing video to set-up 4G connection to answer questions after video.
+
+### 6/22 - 6/27
+
+Keep going on research.
+#### Keep Looking on Custom Model
+
+at 6/24, I think I am encounter a challenge.
+It is easy to edit BERT NER model to have custom label. So the model can predict with one label, like “Eason” is a person.
+However, I still looking on how to let NER model have “multi custom label”, I want the model to know, like, “Eason” is not only a person but also a party and a string. Because the NER example I see so far, BERT turn the label into a 128 dim label ids, not like classic classification model is the one-hot encoding.
+Even-though the model at the pytorch print said it is a n dim output, the actual input data seems not like this.
+
+So I ask my mentors for help, and turn to Keras because I am more familiar with it. ([link](https://github.com/accordproject/labs-cicero-classify/issues/2))
+
+#### Reach with Keras 6/25
+Then, 6/25, I successfully change the model output as I wish to categorial mode via Keras.
+https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/keras/keras_decompose_NER_model.ipynb
+
+I first reference this tutorial.
+https://apoorvnandan.github.io/2020/08/02/bert-ner/
+
+Then I change the classical NER model's loss to CategoricalCrossentropy and transform train_y into the one-hot encoding format.
+
+Now the model is training! I can't wait to validate it and create a multi_label dataset to verify this method will work or not.
+
+I think I can do it since I first learn Deep learning via Keras. Now I need to know how to do the same thing via PyTorch. I will start reading the document and asking others on it.
+
+#### Keep learning Pytorch.
+
+At 6/25 - 6/27, I keep learning Pytorch. While reading the torials, I also learn more about transformers and python functions. 
+
+
+### 6/27
+
+#### Data labeling
+I use Miro to decide the hierarchical clustering structure of Data.
+
+<img src="https://i.imgur.com/FVMcHBH.png" height="300">
+
+This will be discuss on next weekly meeting with my mentors.
+
+#### GitHub Issue Board usage:
+
+I and my mentors agree that we can use the [issue board](https://github.com/accordproject/labs-cicero-classify/issues) on [labs-cicero-classify](https://github.com/accordproject/labs-cicero-classify) to discuss since Walter can't join Slack.
+
+
+#### Plan on next week
+
+- Keep looking on how to build custom model via PyTorch
+- Create the data labeling pipline.
+- Learn Snorkel since it will help data labeling.
+
+
