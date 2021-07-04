@@ -193,3 +193,67 @@ I and my mentors agree that we can use the [issue board](https://github.com/acco
 - Learn Snorkel since it will help data labeling.
 
 
+## Week 4 (06/28 - 07/04)
+
+This week I build the custom model and training pipeline in PyTorch. The model's performance and prediction is impressive.
+
+### 6/28
+#### Meeting WIth Niall and Walter
+
+I have a meeting with my mentor, Niall, and his colleague Walter. 
+
+We define the higherical relation ship between data-type label.
+
+<img src="https://i.imgur.com/gaUeQb5.png" height="300">
+
+Then check the [Adaptor](https://docs.adapterhub.ml/training.html) for transfer learning.
+
+[Meeting Notes](https://hackmd.io/SJptyfORRNOGHbgMPl6hGA)
+
+
+### 6/29
+#### Define the multi label NER dataset format
+I define the multi label NER dataset format like the following format, the multiTags will split by "|".
+
+
+
+| Sentence | POS | multiTags |
+| -------- | -------- | -------- |
+| Eason     | -     | B-per\|Party\|String     |
+| will     | -     | O     |
+| push     | -     | O     |
+| his     | -     | O     |
+| GSoC     | -     | B-eve\|Event\|String     |
+| final     | -     | O     |
+| Code     | -     | Object\|String     |
+| to     | -     | O     |
+| GitHub     | -     | I-org\|Party\|String |
+| before     | -     | O     |
+| 2021-08-17     | -     | B-tim\|TemporalUnit\|String     |
+| .     | -     | O     |
+
+
+
+#### Build the dataloader of "multi hot" encoding labels.
+I build the dataloader to transfer the multi label NER dataset into "multi hot" encoding labels.
+
+### 6/30 - 7/4
+#### Use PyTorch to build and train the custom model
+I build up a training pipeline and the multi-label custom model with BCE Loss. Therefore, the model can consider each label as a confidence rate between 0 and 1 respectively. 
+
+
+([check the result code here](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/PyTorch/BERT_practice/BERT_BASE_Custom_model_multi_label.ipynb)).
+
+#### Result Demo Video
+<iframe width="560" height="315" src="https://www.youtube.com/embed/jkUUPHh553Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+#### Plan on next week
+
+- Learn Snorkel since it will help data labeling and augmented the data.
+- Learn Adaptor for easy transfer learning and better performance.
+- Host an UX/UI Meeting to discuss the interface where user use the model.
+
+
+
+
