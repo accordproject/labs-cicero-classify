@@ -248,9 +248,8 @@ I build up a training pipeline and the multi-label custom model with BCE Loss. T
 
 [![](https://i.imgur.com/TLxLjEl.png)](https://youtu.be/jkUUPHh553Y)
 
-![image](https://user-images.githubusercontent.com/43432631/124400310-040ec400-dd54-11eb-9624-06749eab8564.png)
 
-
+<img src="https://user-images.githubusercontent.com/43432631/124400310-040ec400-dd54-11eb-9624-06749eab8564.png" width="300">
 
 #### Plan on next week
 
