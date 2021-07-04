@@ -246,9 +246,9 @@ I build up a training pipeline and the multi-label custom model with BCE Loss. T
 
 #### [Result Demo Video (Click to go to YouTube to view)](https://youtu.be/jkUUPHh553Y)
 
-<a href="https://youtu.be/jkUUPHh553Y" target="_blank"><img src="https://user-images.githubusercontent.com/43432631/124401284-0fb1b900-dd5b-11eb-8b61-0cc6e4e5ed25.png" width="600" ></a>
+<a href="https://github.com/accordproject/labs-cicero-classify/tree/dev#result-demo-video-click-to-go-to-youtube-to-view" target="_blank"><img src="https://user-images.githubusercontent.com/43432631/124401284-0fb1b900-dd5b-11eb-8b61-0cc6e4e5ed25.png" width="600" ></a>
 
-<a href="https://youtu.be/jkUUPHh553Y" target="_blank"><img src="https://user-images.githubusercontent.com/43432631/124400310-040ec400-dd54-11eb-9624-06749eab8564.png" width="600" ></a>
+<a href="https://github.com/accordproject/labs-cicero-classify/tree/dev#result-demo-video-click-to-go-to-youtube-to-view" target="_blank"><img src="https://user-images.githubusercontent.com/43432631/124400310-040ec400-dd54-11eb-9624-06749eab8564.png" width="600" ></a>
 #### Plan on next week
 
 - Learn Snorkel since it will help data labeling and augmented the data.
