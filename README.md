@@ -253,7 +253,7 @@ I build up a training pipeline and the multi-label custom model with BCE Loss. T
 
 - Learn Snorkel since it will help data labeling and augmented the data.
 - Learn Adaptor for easy transfer learning and better performance.
-- Host an UX/UI Meeting to discuss the interface where user use the model.
+- Host an UX/UI Meeting with Niall, Michael, and Matt to discuss the interface where user use the model.
 
 
 
