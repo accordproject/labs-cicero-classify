@@ -245,7 +245,8 @@ I build up a training pipeline and the multi-label custom model with BCE Loss. T
 ([check the result code here](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/PyTorch/BERT_practice/BERT_BASE_Custom_model_multi_label.ipynb)).
 
 #### Result Demo Video
-<iframe width="560" height="315" src="https://www.youtube.com/embed/jkUUPHh553Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+[![](https://i.imgur.com/TLxLjEl.png)](https://youtu.be/jkUUPHh553Y)
 
 
 #### Plan on next week
