@@ -273,11 +273,11 @@ Niall introduce other to me since they are also working on NER and contract NLP.
 
 I think I can use N adapter for N labels, each adapter specialist for one datatype. So when user correct, it is easy to re-train them without interrupt others.
 
-Now I'm trying to implement it. 
+Now I'm trying to implement it.
 
-While it seems adapter only can train with same output label. So it is a little challenge to set up an effective training pipeline, or I should train N times for N adapter. Now I have come up with a plan to done effective training. That is, train all wanted adapter together with one leabel (ex: 1), no matter it is the correct label or not, but only gradent those with correct label, then train the opposite label (ex: 0) and gradent others. 
+While it seems adapter only can train with same output label. So it is a little challenge to set up an effective training pipeline, or I should train N times for N adapter. Now I have come up with a plan to done effective training. That is, train all wanted adapter together with one label (ex: 1), no matter it is the correct label or not, but only do gradient descent on those with correct label, then train the opposite label (ex: 0) and do gradient descent on others.
 
-While I first will build an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+While I first will build a prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
 
 ### 7/7
 #### Download and Explore Contract text raw data
