@@ -256,5 +256,57 @@ I build up a training pipeline and the multi-label custom model with BCE Loss. T
 - Host an UX/UI Meeting with Niall, Michael, and Matt to discuss the interface where user use the model.
 
 
+## Week 4 (07/05 - 07/11)
+
+This week I mainly explore the adapter to find how it can help me building the model. And set up the first UX/UI Meeting with Niall, Michael and Matt.
+
+### 7/5 
+
+#### Meeting With Niall, Walter, Saajit, Jiangbo, Madeleine
+
+Niall introduce other to me since they are also working on NER and contract NLP.
+
+[Meeting Notes](https://hackmd.io/QjXlR-djQx2IDeJ9u56cbQ)
+
+### 7/5 - 7/10 
+#### Learning Adapter
+
+I think I can use N adapter for N labels, each adapter specialist for one datatype. So when user correct, it is easy to re-train them without interrupt others.
+
+Now I'm trying to implement it. 
+
+While it seems adapter only can train with same output label. So it is a little challenge to set up an effective training pipeline, or I should train N times for N adapter. Now I have come up with a plan to done effective training. That is, train all wanted adapter together with one leabel (ex: 1), no matter it is the correct label or not, but only gradent those with correct label, then train the opposite label (ex: 0) and gradent others. 
+
+While I first will build an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+
+### 7/7
+#### Download and Explore Contract text raw data
+Niall have provide me some contract text rawdata on [this repo](https://github.com/TheAtticusProject/cuad), which can be use on the weak labeling afterward.
+
+### 7/9 
+#### UX/UI meeting with Niall, Michael and Matt.
+
+Result is that, for user to use the model, We will first build an standalone one, focus on the prototype and POC, which can generate an JSON format. Then intergrated it to template editor afterward. the UI component can be re-used.
+
+We set up a user story with Michael and Matt. Then I will look into the model and try to generate the JSON format of the left hand side of the prototype. While Michael, an UX/UI designer, will adapt contract editor design-mode mockups to include classifier.
+
+[UX/UI Meeting Note](https://hackmd.io/bb0az25GSa2vOmivMkADTw)
+
+<img src="https://i.imgur.com/Am8rilp.png" height="300">
+
+### 7/9 
+#### Discuss Snorkel and Adapter with Walter
+
+This meeting actually bring everone come, with Niall, Walter, Saajit, Jiangbo, Madeleine.
+
+Walter teach us how snorkel and adapter work, and how they can intergrated in our project.
+
+[Meeting Note](https://hackmd.io/u0BwLm95T4ak9PIyrVTihQ)
+
+### Plan on next week
+
+- Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+- Prepare for next UX/UI Meeting
+- Learn Snorkel and try to build one to recognize Party from contract dataset.
 
 
