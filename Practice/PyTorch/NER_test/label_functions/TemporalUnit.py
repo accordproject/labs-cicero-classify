@@ -1,0 +1,31 @@
+TemporalUnits = [
+    'second',
+    'seconds',
+    'minute',
+    'minutes',
+    'hour',
+    'hours',
+    'day',
+    'days',
+    'week',
+    'weeks',
+    'month',
+    'months',
+    'season',
+    'seasons',
+    'year',
+    'years',
+    'decade',
+    'decades',
+    'centurie',
+    'centuries',
+    'millennia',
+    'millennias',
+    'era',
+    'eras',
+    "quarter",
+    "quarters",
+]
+
+def is_TemporalUnit(text):
+    return text in TemporalUnits
