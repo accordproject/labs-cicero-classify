@@ -310,3 +310,43 @@ Walter teach us how snorkel and adapter work, and how they can intergrated in ou
 - Learn Snorkel and try to build one to recognize Party from contract dataset.
 
 
+## Week 5 (07/12 - 07/18)
+
+This week, I mainly focus on prepare the presentation on COSCUP and TAICHI, relative little progress on GSoC.
+
+The First Evaluation has finish at 7/14, and I pass! Hope I can keep going.
+
+### 7/12 
+#### Meeting With Niall
+
+I have a Quick meeting with my mentor, Niall. [(Meeting Notes)](https://hackmd.io/XZluEA5PQqmc3lwtvXY1Gg)
+
+### 7/17 
+
+#### Manual Label Functions
+I work on Manual Label Functions, which point out dataType like Integer, CountryCode... etc [(code here)](https://github.com/accordproject/labs-cicero-classify/tree/dev/Practice/PyTorch/NER_test/label_functions)
+
+I will use these function on Snorkel later.
+
+#### Inspiration from WG meeting
+
+I check the [WG meeting video](https://vimeo.com/575395928), Matt have build an awesome model builder which allow user to define and create new model. Moreover, Jerome show how to transfrom between `.cto` and JSON format.
+
+Therefore, I got a vision, that My model's output should look like Jerome's JSON format.
+
+So it seems can be like [Scratch](https://scratch.mit.edu/), user can drag and drop the Attribute of each Model and Object. What the NLP model do, is recognize the poential attribute so the user can choose them easily.
+
+Furthermore, User also can select "one click complete" function, model will give a fit on those attribute. then User manually correct them later.
+
+After the label is finish, it can be export to the JSON format as Jerome shown.
+
+Next week I will build some prototype base on it.
+
+### Plan on next week
+
+- Prepare WG meeting presentation.
+- Prepare for next UX/UI Meeting.
+- Learn Snorkel and try to build one to recognize Party from contract dataset.
+- Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+
+
