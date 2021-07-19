@@ -4,3 +4,6 @@
 [submodule "Practice/PyTorch/BERT_practice/Practice/PyTorch/BERT_practice/bertviz_repo"]
 	path = Practice/PyTorch/BERT_practice/Practice/PyTorch/BERT_practice/bertviz_repo
 	url = https://github.com/jessevig/bertviz
+[submodule "datasets/entity-recognition-datasets"]
+	path = datasets/entity-recognition-datasets
+	url = git@github.com:EasonC13/entity-recognition-datasets.git

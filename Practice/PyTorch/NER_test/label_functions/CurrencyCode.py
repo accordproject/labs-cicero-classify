@@ -1,4 +1,5 @@
 CurrencyCodes = [
+    '$',
     'AED',
     'AFN',
     'ALL',
