@@ -180,4 +180,4 @@ CurrencyCodes = [
     'ZWL',
 ]
 def is_CurrencyCode(text):
-    return text in CurrencyCodes
+    return text.upper() in CurrencyCodes
