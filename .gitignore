@@ -145,3 +145,5 @@ cached_*
 *.tar.gz
 
 save_*
+
+config.py
