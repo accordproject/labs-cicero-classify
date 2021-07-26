@@ -14,4 +14,4 @@ CryptoCurrencyCodes = [
     'ZEC',
 ]
 def is_CryptoCurrencyCode(text):
-    return text in CryptoCurrencyCodes
+    return text.upper() in CryptoCurrencyCodes
