@@ -377,7 +377,7 @@ Then, I took my second dose of vaccine, so have a two day break.
 ### 7/25
 #### Prepare data to recognize Party from contract dataset
 
-At Sunday, I prepare data for multiple label NER dataset, plan to build a adapter base NER model next week.
+At Sunday, I prepare data for multiple label NER dataset, plan to build a adapter base NER model next week. [(Code)](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/PyTorch/NER_test/0725_label_dataset_v2.ipynb)
 
 ## Plan on next week
 - Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
