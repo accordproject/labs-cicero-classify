@@ -350,3 +350,46 @@ Next week I will build some prototype base on it.
 - Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
 
 
+## Week 6 (07/19 - 07/25)
+
+### 07/19
+#### Meeting with Niall
+
+I have a meeting with Niall and Walter, we talk about the WG Presentation plan, then talk about how to label some datatype like Timezone or Address. Walter suggest us can use some [Timezone converter](https://howchoo.com/g/ywi5m2vkodk/working-with-datetime-objects-and-timezones-in-python) to align different timezone to a general format. And we also think we can use [DateParser](https://dateparser.readthedocs.io/en/latest/) to do it. Both will take into account. ([Meeting Note](https://hackmd.io/h91bW8_3RdecaCGKvLEkVA?edit))
+
+### 07/21
+#### UX/UI Meeting with Niall, Michael and Jerome
+
+Me, Niall, Michael and Jerome talk about how user will interact the NLP model to create concerto contract model. Then brif discuss the poential user persona. We think we will arrange another meeting with poential user to get detail of user persona.
+[Meeting Note](https://hackmd.io/pmH2HG5iQq6MoUB6wSdpDg)
+
+### 07/22
+#### WG meeting presentation.
+
+I have a monthly presentation at Working Group meeting. [Meeting Record Link](https://vimeo.com/577771919). WG like the Idea that intergrated existing component with the model userflow. 
+
+Dan will hold an follow up meeting with me and Niall about defining model's API with Accord Project's existing service.
+
+Also, there are a poential user, Parsa Pezeshki are interested on useing the model and reach out at slack channel.
+
+Then, I took my second dose of vaccine, so have a two day break.
+
+### 7/25
+#### Prepare data to recognize Party from contract dataset
+
+At Sunday, I prepare data for multiple label NER dataset, plan to build a adapter base NER model next week.
+
+## Plan on next week
+- Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+- Arrange meeting for user persona.
+- Arrange meeting for API connect with Dan
+
+## Week 7 (07/26 - 08/01)
+
+
+### 07/26
+#### Meeting with Niall
+
+I have a meeting with Niall, Niall is going to a vacation next two week. Hope we can meet Dan before Saturday. [Meeting Notes](https://hackmd.io/t_pn8YGUSuOVaWMQ-zstBg)
+
+Moreover, I will start writing my commit message [in more formal way](https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md#commits). 
