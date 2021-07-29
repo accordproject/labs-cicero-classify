@@ -142,3 +142,4 @@ cached_*
 *.csv
 *.tsv
 *.zip
+*.tar.gz

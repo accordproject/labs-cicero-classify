@@ -256,5 +256,140 @@ I build up a training pipeline and the multi-label custom model with BCE Loss. T
 - Host an UX/UI Meeting with Niall, Michael, and Matt to discuss the interface where user use the model.
 
 
+## Week 4 (07/05 - 07/11)
+
+This week I mainly explore the adapter to find how it can help me building the model. And set up the first UX/UI Meeting with Niall, Michael and Matt.
+
+### 7/5 
+
+#### Meeting With Niall, Walter, Saajit, Jiangbo, Madeleine
+
+Niall introduce other to me since they are also working on NER and contract NLP.
+
+[Meeting Notes](https://hackmd.io/QjXlR-djQx2IDeJ9u56cbQ)
+
+### 7/5 - 7/10 
+#### Learning Adapter
+
+I think I can use N adapter for N labels, each adapter specialist for one datatype. So when user correct, it is easy to re-train them without interrupt others.
+
+Now I'm trying to implement it.
+
+While it seems adapter only can train with same output label. So it is a little challenge to set up an effective training pipeline, or I should train N times for N adapter. Now I have come up with a plan to done effective training. That is, train all wanted adapter together with one label (ex: 1), no matter it is the correct label or not, but only do gradient descent on those with correct label, then train the opposite label (ex: 0) and do gradient descent on others.
+
+While I first will build a prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+
+### 7/7
+#### Download and Explore Contract text raw data
+Niall have provide me some contract text rawdata on [this repo](https://github.com/TheAtticusProject/cuad), which can be use on the weak labeling afterward.
+
+### 7/9 
+#### UX/UI meeting with Niall, Michael and Matt.
+
+Result is that, for user to use the model, We will first build an standalone one, focus on the prototype and POC, which can generate an JSON format. Then intergrated it to template editor afterward. the UI component can be re-used.
+
+We set up a user story with Michael and Matt. Then I will look into the model and try to generate the JSON format of the left hand side of the prototype. While Michael, an UX/UI designer, will adapt contract editor design-mode mockups to include classifier.
+
+[UX/UI Meeting Note](https://hackmd.io/bb0az25GSa2vOmivMkADTw)
+
+<img src="https://i.imgur.com/Am8rilp.png" height="300">
+
+### 7/9 
+#### Discuss Snorkel and Adapter with Walter
+
+This meeting actually bring everone come, with Niall, Walter, Saajit, Jiangbo, Madeleine.
+
+Walter teach us how snorkel and adapter work, and how they can intergrated in our project.
+
+[Meeting Note](https://hackmd.io/u0BwLm95T4ak9PIyrVTihQ)
+
+### Plan on next week
+
+- Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+- Prepare for next UX/UI Meeting
+- Learn Snorkel and try to build one to recognize Party from contract dataset.
 
 
+## Week 5 (07/12 - 07/18)
+
+This week, I mainly focus on prepare the presentation on COSCUP and TAICHI, relative little progress on GSoC.
+
+The First Evaluation has finish at 7/14, and I pass! Hope I can keep going.
+
+### 7/12 
+#### Meeting With Niall
+
+I have a Quick meeting with my mentor, Niall. [(Meeting Notes)](https://hackmd.io/XZluEA5PQqmc3lwtvXY1Gg)
+
+### 7/17 
+
+#### Manual Label Functions
+I work on Manual Label Functions, which point out dataType like Integer, CountryCode... etc [(code here)](https://github.com/accordproject/labs-cicero-classify/tree/dev/Practice/PyTorch/NER_test/label_functions)
+
+I will use these function on Snorkel later.
+
+#### Inspiration from WG meeting
+
+I check the [WG meeting video](https://vimeo.com/575395928), Matt have build an awesome model builder which allow user to define and create new model. Moreover, Jerome show how to transfrom between `.cto` and JSON format.
+
+Therefore, I got a vision, that My model's output should look like Jerome's JSON format.
+
+So it seems can be like [Scratch](https://scratch.mit.edu/), user can drag and drop the Attribute of each Model and Object. What the NLP model do, is recognize the poential attribute so the user can choose them easily.
+
+Furthermore, User also can select "one click complete" function, model will give a fit on those attribute. then User manually correct them later.
+
+After the label is finish, it can be export to the JSON format as Jerome shown.
+
+Next week I will build some prototype base on it.
+
+### Plan on next week
+
+- Prepare WG meeting presentation.
+- Prepare for next UX/UI Meeting.
+- Learn Snorkel and try to build one to recognize Party from contract dataset.
+- Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+
+
+## Week 6 (07/19 - 07/25)
+
+### 07/19
+#### Meeting with Niall
+
+I have a meeting with Niall and Walter, we talk about the WG Presentation plan, then talk about how to label some datatype like Timezone or Address. Walter suggest us can use some [Timezone converter](https://howchoo.com/g/ywi5m2vkodk/working-with-datetime-objects-and-timezones-in-python) to align different timezone to a general format. And we also think we can use [DateParser](https://dateparser.readthedocs.io/en/latest/) to do it. Both will take into account. ([Meeting Note](https://hackmd.io/h91bW8_3RdecaCGKvLEkVA?edit))
+
+### 07/21
+#### UX/UI Meeting with Niall, Michael and Jerome
+
+Me, Niall, Michael and Jerome talk about how user will interact the NLP model to create concerto contract model. Then brif discuss the poential user persona. We think we will arrange another meeting with poential user to get detail of user persona.
+[Meeting Note](https://hackmd.io/pmH2HG5iQq6MoUB6wSdpDg)
+
+### 07/22
+#### WG meeting presentation.
+
+I have a monthly presentation at Working Group meeting. [Meeting Record Link](https://vimeo.com/577771919). WG like the Idea that intergrated existing component with the model userflow. 
+
+Dan will hold an follow up meeting with me and Niall about defining model's API with Accord Project's existing service.
+
+Also, there are a poential user, Parsa Pezeshki are interested on useing the model and reach out at slack channel.
+
+Then, I took my second dose of vaccine, so have a two day break.
+
+### 7/25
+#### Prepare data to recognize Party from contract dataset
+
+At Sunday, I prepare data for multiple label NER dataset, plan to build a adapter base NER model next week. [(Code)](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/PyTorch/NER_test/0725_label_dataset_v2.ipynb)
+
+## Plan on next week
+- Build and train an prototype which have N adapter for N labels, on basic NER dataset, to prove adapter will work for this job.
+- Arrange meeting for user persona.
+- Arrange meeting for API connect with Dan
+
+## Week 7 (07/26 - 08/01)
+
+
+### 07/26
+#### Meeting with Niall
+
+I have a meeting with Niall, Niall is going to a vacation next two week. Hope we can meet Dan before Saturday. [Meeting Notes](https://hackmd.io/t_pn8YGUSuOVaWMQ-zstBg)
+
+Moreover, I will start writing my commit message [in more formal way](https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md#commits). 
