@@ -1,0 +1,17 @@
+{
+  "config": {
+    "activation_function": "tanh",
+    "head_type": "classification",
+    "label2id": {
+      "\ud83d\udc4d": 1,
+      "\ud83d\udc4e": 0
+    },
+    "layers": 2,
+    "num_labels": 2
+  },
+  "hidden_size": 768,
+  "model_class": "RobertaModelWithHeads",
+  "model_name": "roberta-base",
+  "model_type": "roberta",
+  "name": "rotten_tomatoes"
+}
