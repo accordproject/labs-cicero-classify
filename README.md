@@ -324,7 +324,7 @@ I have a Quick meeting with my mentor, Niall. [(Meeting Notes)](https://hackmd.i
 ### 7/17 
 
 #### Manual Label Functions
-I work on Manual Label Functions, which point out dataType like Integer, CountryCode... etc [(code here)](https://github.com/accordproject/labs-cicero-classify/tree/dev/Practice/PyTorch/NER_test/label_functions)
+I work on Manual Label Functions, which point out dataType like Integer, CountryCode... etc [(code here)](https://github.com/accordproject/labs-cicero-classify/tree/dev/Practice/PyTorch/NER_test/label_functions). Also please [check the README about functions](https://github.com/accordproject/labs-cicero-classify/tree/dev/Practice/PyTorch/NER_test/label_functions#label-functions).
 
 I will use these function on Snorkel later.
 
