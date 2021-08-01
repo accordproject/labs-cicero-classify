@@ -393,3 +393,34 @@ At Sunday, I prepare data for multiple label NER dataset, plan to build a adapte
 I have a meeting with Niall, Niall is going to a vacation next two week. Hope we can meet Dan before Saturday. [Meeting Notes](https://hackmd.io/t_pn8YGUSuOVaWMQ-zstBg)
 
 Moreover, I will start writing my commit message [in more formal way](https://github.com/accordproject/techdocs/blob/master/DEVELOPERS.md#commits). 
+
+### 07/27
+#### Set up environment for convenience git use
+I set up the CUDA environment, then put my code from docker container to outside system, so I can use VScode to edit the git via ssh remotely. That is far more easy than commend line.
+
+### 07/28 - 7/31
+#### Create Multi Adapter for Each NER Label
+I write the training pipeline to train multi Adapter septerately for each tag [from dataset I create before](https://github.com/accordproject/labs-cicero-classify/tree/dev#prepare-data-to-recognize-party-from-contract-dataset). Just like I said at the [WG meeting](https://github.com/accordproject/labs-cicero-classify/tree/dev#wg-meeting-presentation). After lots of try and error, it work now finally. Please Reference the code [here](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/adapter_roberta/Adapter_train_one_by_one_device0.ipynb).
+
+And the performance of this approach is almost same as the original NER model. [Please check the code here for performance test](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/adapter_roberta/load_multi_adapter.ipynb). Moreover, the training time of adapter is super-fast! within 10 min I can finish one tag's fine-tune.
+
+The most important thing to note from my try, is that when add new Adapter, model need to send to GPU device again. Then need to re-setup the optimizer from the new model. Moreover, I [can't train multiple adapter at once since GPU will out of memory](https://github.com/accordproject/labs-cicero-classify/blob/dev/Practice/adapter_roberta/fail_Adapter_custom_model_train_together_0730.ipynb) (Still don't know why).
+
+The Adapters include: ['Float','TemporalUnit','I-gpe','CountryCode','CurrencyCode','Timezone','CryptoCurrencyCode','Month','Party','B-tim','I-art','Time','B-per','B-gpe','B-geo','O','Location','Event','I-nat','Race','B-org','I-geo','I-tim','I-eve','SpecialTerm','B-art','US_States','B-eve','I-org','B-nat','Object','I-per','Integer']
+
+##### Float's Problem
+However, I notice that BERT or RoBERTa can't recognize Float, because it will be unrecognizeable at Tokenizer's text to ids parsing, and when predict, Float will be seperate it to pieces then model will think it is integer.
+
+For example, "13.13" in RoBERTa Tokenizer's token to id will be [100] mean unknown. and when predict from raw text, it will be ["13", ".", "13"] then put into model in three words. Therefore, I might need to re-train Float's Adapter by other well-designed float generator dataset that can help model recognize Float.
+
+##### Augmented data with Adapter
+And the good news is, now the labels are able to train seperately. So I can finally use Name-Generator to let Party's adapter recognize more name without affect other label. And it also can be work on TimeZone, Currency code, Country Code's detection.
+
+### 7/31
+#### API Mockup
+Dan, Jerome and Matt have create a private Chat with me to discuss API connect with my model. Now I'm writing the API Mockup [here](https://github.com/accordproject/labs-cicero-classify/tree/dev/API). And I will linked it to NER model afterward. Hope we can have a meeting soon with the API connect.
+
+## Plan on next week
+- Augmented data with Adapter
+- API Mockup
+- Prepare meeting for API mockup
