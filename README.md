@@ -424,3 +424,56 @@ Dan, Jerome and Matt have create a private Chat with me to discuss API connect w
 - Augmented data with Adapter
 - API Mockup
 - Prepare meeting for API mockup
+
+## Week 7 (08/02 - 08/08)
+
+This week my progress is relative little since I spend time on other stuff. (Feeling ill these day). Will catch up at to following week.
+
+#### API Mockup Progress
+
+I change the [API Example Mockup](https://github.com/accordproject/labs-cicero-classify/blob/dev/API/example_mockup.ipynb) for more RESTful.
+
+Preview at https://gsoc.demo.eason.tw/docs
+
+There still have many discussion about it. I will keep iterate the API afterward. And now I will keep focus on the Model part.
+
+#### Plan on Tokenizer-fit dataset
+
+I plan to re-construct the dataset to let it fit RoBERTa's Tokenizer.
+
+### 08/05
+#### WG Meeting talk
+
+According to previous meeting, The ML model will do four tasks:
+1. Suggest the template to be use by raw text.
+2. Predict special KeyWord by raw text.
+3. Predict best practice of the concerto model by marked text.
+4. Warn User if they make a low-confidence label.
+
+I have present it at WG meeting and looking for feedback about other need of the ML model.
+## Week 8 (08/09 - 08/15)
+
+### 0809
+#### Meeting with Walter
+
+I have a meeting with Walter and Jiangbo. 
+
+##### Snorkel
+We discuss how Snorkel will benefit my project. Walter show me how to let snorkel label NER dataset, and also demonstrate a fluent use of PyCharm, that is super cool! While I think I will first work on the model part, snorkel's data augmentation and multi labeling function can wait until after I have multi label function.
+
+
+##### Tokenizer
+And we also discuss about how to let model know the Tokenizer, Jiangbo agree that I can use RoBERTa's Tokenizer to re-construct the NER dataset to let it fit the model. Will write the pipeline afterward.
+
+
+##### QA for best practice fit
+and we How to let the model "Predict best practice of the concerto model by marked text". Jiangbo and Walter suggest that we can use QA model to do it. 
+
+That is, provide the context and JSON file, then ask model where is the best fit of each JSON attribute (ex: where is Buyer's Address). 
+
+![](https://i.imgur.com/8m71caN.png)
+
+And then model will also can be iterate by user provide more detail information. Like if user mark Eason is a Buyer, the Question will change the question to more specificly to "Where is Eason's Address?"
+
+![](https://i.imgur.com/cvsT1ET.png)
+
