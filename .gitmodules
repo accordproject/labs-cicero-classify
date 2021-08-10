@@ -6,4 +6,4 @@
 	url = https://github.com/jessevig/bertviz
 [submodule "datasets/entity-recognition-datasets"]
 	path = datasets/entity-recognition-datasets
-	url = git@github.com:EasonC13/entity-recognition-datasets.git
+	url = https://github.com/juand-r/entity-recognition-datasets.git
