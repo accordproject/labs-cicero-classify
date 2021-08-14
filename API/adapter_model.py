@@ -19,7 +19,7 @@ def encode_batch(batch):
   """Encodes a batch of input data using the model tokenizer."""
   return tokenizer(batch["text"], max_length=80, truncation=True, padding="max_length")
 
-data_path = "../Practice/adapter_roberta/NER_multilabel_data_v2.csv"
+data_path = "./NER_multilabel_data_v2.csv"
 df = pd.read_csv(data_path)
 
 all_tags = df.newTag
@@ -52,9 +52,9 @@ model = RobertaModelWithHeads.from_pretrained(
 all_adapter_name = []
 for tag in all_tags:
     adapter_name = f"{tag}_0731"
-    name = model.load_adapter(f"../Practice/adapter_roberta/save_adapters/{adapter_name}")
+    name = model.load_adapter(f"./save_adapters/{adapter_name}")
     all_adapter_name.append(name)
-    model.load_head(f"../Practice/adapter_roberta/save_heads/{adapter_name}")
+    model.load_head(f"./save_heads/{adapter_name}")
 
 import re
 
