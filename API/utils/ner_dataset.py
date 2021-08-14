@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import torch
 
-data_path = "../Practice/adapter_roberta/NER_multilabel_data_v2.csv"
+data_path = "./NER_multilabel_data_v2.csv"
 BATCH_SIZE = 16
 def get_trainset_data_loader(tokenizer, data_path = data_path,
                              BATCH_SIZE = BATCH_SIZE):

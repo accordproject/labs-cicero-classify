@@ -31,9 +31,9 @@ all_tags = all_tags.split("|")
 all_tags = set(all_tags)
 all_tags = list(all_tags)
 
-from ner_dataset import get_trainset_data_loader
+from utils.ner_dataset import get_trainset_data_loader
 
-all_tags, trainset, trainloader = get_trainset_data_loader(tokenizer, BATCH_SIZE=128)
+all_tags, trainset, trainloader = get_trainset_data_loader(tokenizer, BATCH_SIZE=128, data_path = data_path)
 
 
 from transformers import RobertaConfig, RobertaModelWithHeads

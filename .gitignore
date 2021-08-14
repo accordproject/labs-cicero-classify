@@ -147,3 +147,4 @@ cached_*
 save_*
 
 config.py
+API_Debug/*
