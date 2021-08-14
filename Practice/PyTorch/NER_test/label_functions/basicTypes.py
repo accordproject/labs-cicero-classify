@@ -1,6 +1,6 @@
 def is_Integer(text):
     try:
-        int(text)
+        int(text.replace(",", ""))
         return True
     except:
         return False
