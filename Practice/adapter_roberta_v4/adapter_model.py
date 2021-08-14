@@ -19,7 +19,7 @@ def encode_batch(batch):
   """Encodes a batch of input data using the model tokenizer."""
   return tokenizer(batch["text"], max_length=80, truncation=True, padding="max_length")
 
-data_path = "./NER_multilabel_data_v3.csv"
+data_path = "./NER_multilabel_data_v4.csv"
 df = pd.read_csv(data_path)
 
 all_tags = df.newTag

@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import torch
 
-#data_path = "./NER_multilabel_data_v2.csv"
+data_path = "./NER_multilabel_data_v4.csv"
 BATCH_SIZE = 16
-def get_trainset_data_loader(tokenizer, data_path = "",
+def get_trainset_data_loader(tokenizer, data_path = data_path,
                              BATCH_SIZE = BATCH_SIZE):
     df = pd.read_csv(data_path)
 
@@ -19,7 +19,7 @@ def get_trainset_data_loader(tokenizer, data_path = "",
 
 
     def process_csv(data_path):
-        df = pd.read_csv(data_path)
+        df = pd.read_csv(data_path, encoding="latin-1")
         df.loc[:, "Sentence #"] = df["Sentence #"].fillna(method="ffill")
         sentences = df.groupby("Sentence #")["Word"].apply(list).values
         tags = df.groupby("Sentence #")["newTag"].apply(list).values
@@ -109,7 +109,7 @@ def get_trainset_data_loader(tokenizer, data_path = "",
 
     # 初始化一個專門讀取訓練樣本的 Dataset，使用中文 BERT 斷詞
 
-    df = pd.read_csv(data_path)
+    df = pd.read_csv(data_path, encoding="latin-1")
 
     labels = np.unique("|".join(list(df.newTag)).split("|"))
     print(f"labels: {labels}")
