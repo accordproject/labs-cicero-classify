@@ -1,17 +1,21 @@
 
 from fastapi import FastAPI, Depends, status
+import pymongo
 from starlette.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 
 from core.config import ALLOWED_HOSTS, PROJECT_NAME, PROJECT_VERSION, API_PORT
+from core.config import DATABASE_NAME, Feedback_Label_Collection, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION
 from core.errors import http_422_error_handler, http_error_handler
 from db.mongodb_connect import close_mongo_connection, connect_to_mongo
 from db.mongodb import AsyncIOMotorClient, get_database
 import asyncio
 
+from datetime import datetime
 
+from motor.motor_asyncio import AsyncIOMotorClient as MotorClient
 
 app = FastAPI(title=PROJECT_NAME, version = PROJECT_VERSION)
 
@@ -52,47 +56,106 @@ JSONStructure = Union[JSONArray, JSONObject]
 
 example_text = "Dan Will be deemed to have completed its delivery obligations before 2021-7-5 if in Niall's opinion, the Jeep Car satisfies the Acceptance Criteria, and Niall notifies Dan in writing that it is accepting the Jeep Car."
 
+class create_new_label_body(BaseModel):
+    user: str = "example@gmail.com"
+    label_name: str = "Party"
+    inherit: list = ["B-per", "I-per", "B-org", "I-org"]
+    alias_as: list = ["String"]
+    label_description: str = """Label 'Party' is to label out Party in concerto contract. Party also all the ["B-per", "I-per", "B-org", "I-org"] in current and future dataset, and when training, Party will also be label as String."""
 
+
+@app.post("/label", tags = ["Optimize Data"], status_code=status.HTTP_200_OK)
+async def define_new_label(data: create_new_label_body):
+    mongo_client = await get_database()
+    col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
+    result = col.find({"label_name": data.label_name})
+    result = await result.to_list(None)
+    if len(result) != 0:
+        print(f"Already have {data.label_name}")
+        return {
+            "message": f"Failed, Already have {data.label_name}",
+            "label": result[0]
+        }
+    else:
+        dataToStore = {
+            "user": data.user,
+            "label_name": data.label_name,
+            "inherit": data.inherit,
+            "alias_as": data.alias_as,
+            "label_description": data.label_description,
+            "TimeStamp": datetime.now()
+        }
+        try:
+            result = await col.insert_one(dataToStore)
+            return {
+                "message": f"Success, new label {data.label_name} added.",
+                "id": str(result.inserted_id),
+            }
+        except Exception as e:
+            return {
+                "message": f"Fail, please check the Error Message",
+                "error_msg": str(e)
+            }
 
 class update_data_body(BaseModel):
-    text: JSONArray = [
+    user: str = "example@gmail.com"
+    texts: JSONArray = [
         {
             "text": "Eason",
-            "label": "Party"
+            "labels": ["Party", "String"]
         },
         {
             "text": "will",
-            "label": "O"
+            "labels": ["O"]
         },
         {
             "text": "meet",
-            "label": "O"
+            "labels": ["O"]
         },
         {
             "text": "Dan",
-            "label": "Party"
+            "labels": ["Party", "String"]
         },
         {
             "text": "at",
-            "label": "O"
+            "labels": ["O"]
         },
         {
             "text": "2021-08-04 18:00",
-            "label": "TemporalUnit"
+            "labels": ["TemporalUnit"]
         },
         {
             "text": ".",
-            "label": "O"
+            "labels": ["O"]
         },
     ]
-
-
-
+    
 @app.post("/data/label", tags = ["Optimize Data"], status_code=status.HTTP_200_OK)
-def update_data(data: update_data_body):
+async def update_labeled_data(data: update_data_body):
+    dataToStore = {
+        "user": data.user,
+        "text_and_labels": data.texts,
+        "TimeStamp": datetime.now(),
+    }
+    # todo: Check the label in text all included.
+    mongo_client = await get_database()
+    col = mongo_client[DATABASE_NAME][Feedback_Label_Collection]
+    result = await col.insert_one(dataToStore)
     return "OK"
 
 
+
+@app.post("/model/label:retrain/{label_name}", tags = ["ReTrain"], status_code=status.HTTP_200_OK)
+def retrain_specific_label_model(label_name: str):
+    """Re-Train Certain label with existing data."""
+    dataToStore = {
+
+    }
+    return {
+        "message": "success, start retrain.",
+        "train-data-amount": 2500,
+        "trace_id": "TBA",
+    }
 
 class update_template_data_body(BaseModel):
     text: str = example_text
@@ -130,19 +193,13 @@ def retrain_suggestion_model():
 @app.post("/model/template:retrain", tags = ["ReTrain"], status_code=status.HTTP_200_OK)
 def retrain_template_model():
     return {
-        "message": "success, start retrain.",
+        "message": "success AAA, start retrain.",
         "train-data-amount": 2500,
     }
 
 
 
-@app.post("/model/label:retrain", tags = ["ReTrain"], status_code=status.HTTP_200_OK)
-def retrain_model():
-    return {
-        "message": "success, start retrain.",
-        "train-data-amount": 2500,
-        "affect-labels": ['Party', 'Race', 'SpecialTerm', 'TemporalUnit', 'Time', 'Timezone', 'US_States']
-    }
+
 
 
 
