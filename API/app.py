@@ -16,6 +16,7 @@ import asyncio
 from datetime import datetime
 
 from motor.motor_asyncio import AsyncIOMotorClient as MotorClient
+from db.utils import convert_mongo_id
 
 app = FastAPI(title=PROJECT_NAME, version = PROJECT_VERSION)
 
@@ -65,15 +66,12 @@ async def get_labeled_data(label_name: str = None, detail: bool = False):
                       {"text_and_labels": detail})
     
     result = await result.to_list(None)
-    result = list(map(change_mongo_id,result))
+    result = list(map(convert_mongo_id,result))
     return {
         "message": "Success",
         "data": result
     }
-def change_mongo_id(data):
-    data["id"] = str(data["_id"])
-    del data["_id"]
-    return data
+
 
 @app.post("/dataset/label/{label_name}")
 def create_new_dataset_for_the_LabelName(label_name):
@@ -115,16 +113,7 @@ def recommand_template(data: text_label_body):
 
 
 
-class suggest_best_practice_body(BaseModel):
-    text: str = example_text
 
-
-
-@app.post("/model/suggestion", tags = ["Predict"], status_code=status.HTTP_200_OK)
-def suggest_best_practice(data: suggest_best_practice_body):
-    return {
-        "predict": "Not Finish Yet."
-    }
 
 class update_template_data_body(BaseModel):
     text: str = example_text
