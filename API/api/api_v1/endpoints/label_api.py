@@ -25,7 +25,7 @@ class create_new_label_body(BaseModel):
     label_name: str = "Party"
     inherit: list = ["B-per", "I-per", "B-org", "I-org"]
     alias_as: list = ["String"]
-    label_description: str = """Label 'Party' is to label out Party in concerto contract. Party also all the ["B-per", "I-per", "B-org", "I-org"] in current and future dataset, and when training, Party will also be label as String."""
+    comment: str = """This is the example cased."""
 
 
 @router.post("/label", tags = ["Optimize Data"], status_code=status.HTTP_200_OK)
@@ -60,7 +60,31 @@ async def define_new_label(data: create_new_label_body):
                 "error_msg": str(e)
             }
 
+from db.utils import convert_mongo_id
+@router.get("/label/{label_name}")
+async def get_label_by_name(label_name):
+    mongo_client = await get_database()
+    label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
+    label_data_col = mongo_client[DATABASE_NAME][Feedback_Label_Collection]
 
+    label = await label_define_col.find_one({"label_name": label_name})
+    label = convert_mongo_id(label)
+
+    if label == None:
+        pass
+        #return "404"
+
+    texts = label_data_col.find(
+        {"text_and_labels.labels": {"$in": [label_name] + label["inherit"]}},
+        {"text_and_labels": False}
+    )
+    texts = await texts.to_list(None)
+    texts_count = len(texts)
+
+    label["data_count"] = texts_count
+
+    label["description(auto_generated)"] = f"""Label "{label["label_name"]}" is to label out {label["label_name"]} in concerto contract. {label["label_name"]} also all the {label["inherit"]} labels in current and future dataset, and when training {label["alias_as"]}, text which labeled as Party will also be labeled positively. Currently, we have {label["data_count"]} datas contain this label in training dataset."""
+    return label
 
 class update_data_body(BaseModel):
     user: str = "example@gmail.com"
