@@ -118,12 +118,28 @@ class update_data_body(BaseModel):
             "labels": ["O"]
         },
     ]
-    
+
+from utils.adapter_model import tokenizer as roberta_tokenizer
+
 @router.post("/data/label", tags = ["Optimize Data"], status_code=status.HTTP_200_OK)
 async def update_labeled_data(data: update_data_body):
+    token_and_labels = []
+    last_word_index = len(data.texts)-1
+    for i, text in enumerate(data.texts):
+        if i != 0 and i != last_word_index:
+            text_to_do = " " + text["text"]
+        else:
+            text_to_do = text["text"]
+        tokens = roberta_tokenizer.tokenize(text_to_do)
+        for j, token in enumerate(tokens):
+            token_and_labels.append({
+                "token": token,
+                "label": text["labels"]
+            })
     dataToStore = {
         "user": data.user,
         "text_and_labels": data.texts,
+        "token_and_labels": token_and_labels,
         "TimeStamp": datetime.now(),
     }
     # todo: Check the label in text all included.
