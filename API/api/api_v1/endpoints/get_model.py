@@ -13,18 +13,6 @@ JSONStructure = Union[JSONArray, JSONObject]
 router = APIRouter()
 
 
-@router.get("/model/label", tags = ["Status"], status_code=status.HTTP_200_OK)
-def get_model_status():
-    return {
-        "message": "get success",
-        "status": "re-training",
-        "step": {
-            "current": 30,
-            "total": 50,
-        },
-        "train-data-amount": 2500,
-        "affect-labels": ['Party', 'Race', 'SpecialTerm', 'TemporalUnit', 'Time', 'Timezone', 'US_States']
-    }
 
 
 

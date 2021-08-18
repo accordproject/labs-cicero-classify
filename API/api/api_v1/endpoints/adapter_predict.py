@@ -39,3 +39,10 @@ def text_label(data: text_label_body):
         })
     return out_Tokens
 
+@router.get("/model/label", tags = ["Status"], status_code=status.HTTP_200_OK)
+def get_model_status():
+    return {
+        "message": "get success",
+        "status": "online",
+        "tags": adapter_model.all_adapter_name
+    }
