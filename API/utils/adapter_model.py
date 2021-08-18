@@ -4,12 +4,12 @@ import torch
 print(f"Torch Version: {torch.__version__}")
 
 import transformers
-print(f"transformers (Adapter) Version: {transformers.__version__}")
+print(f"Transformers (Adapter) Version: {transformers.__version__}")
 
-from transformers import RobertaTokenizer
+print(f"Loading adapter model...")
+
 import numpy as np
 
-tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 from transformers import RobertaTokenizer
 
@@ -19,42 +19,23 @@ def encode_batch(batch):
   """Encodes a batch of input data using the model tokenizer."""
   return tokenizer(batch["text"], max_length=80, truncation=True, padding="max_length")
 
-data_path = "../Practice/adapter_roberta/NER_multilabel_data_v2.csv"
-df = pd.read_csv(data_path)
-
-all_tags = df.newTag
-
-all_tags = set(all_tags)
-
-all_tags = "|".join(all_tags)
-all_tags = all_tags.split("|")
-all_tags = set(all_tags)
-all_tags = list(all_tags)
-
-from ner_dataset import get_trainset_data_loader
-
-all_tags, trainset, trainloader = get_trainset_data_loader(tokenizer, BATCH_SIZE=128)
-
+from utils.ner_dataset import get_trainset_data_loader
 
 from transformers import RobertaConfig, RobertaModelWithHeads
 
-config = RobertaConfig.from_pretrained(
-    "roberta-base",
-    num_labels=len(all_tags),
-    label2id = trainset.label_map, 
-    id2label = trainset.id2label
-)
+config = RobertaConfig.from_pretrained("roberta-base")
 model = RobertaModelWithHeads.from_pretrained(
     "roberta-base",
     config=config,
 )
 
+import os
+adapter_name_in_dir = os.listdir("./save_adapters/")
 all_adapter_name = []
-for tag in all_tags:
-    adapter_name = f"{tag}_0731"
-    name = model.load_adapter(f"../Practice/adapter_roberta/save_adapters/{adapter_name}")
+for adapter_name in adapter_name_in_dir:
+    name = model.load_adapter(f"./save_adapters/{adapter_name}")
     all_adapter_name.append(name)
-    model.load_head(f"../Practice/adapter_roberta/save_heads/{adapter_name}")
+    model.load_head(f"./save_heads/{adapter_name}")
 
 import re
 
