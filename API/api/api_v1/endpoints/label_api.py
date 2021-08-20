@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, status
+from inspect import trace
+from fastapi import APIRouter, Depends, status, Response
 
 from typing import Optional
 
 from pydantic import BaseModel
 
 from core.config import ALLOWED_HOSTS, PROJECT_NAME, PROJECT_VERSION, API_PORT
-from core.config import DATABASE_NAME, Feedback_Label_Collection, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION
+from core.config import DATABASE_NAME, Feedback_Label_Collection, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION
 
 from db.mongodb import AsyncIOMotorClient, get_database
 import asyncio
@@ -26,9 +27,10 @@ class create_new_label_body(BaseModel):
     inherit: list = ["B-per", "I-per", "B-org", "I-org"]
     alias_as: list = ["String"]
     comment: str = """This is the example cased."""
+    tags: list = []
 
 
-@router.post("/label", tags = ["Optimize Data"], status_code=status.HTTP_200_OK)
+@router.post("/labels", tags = ["Label"], status_code=status.HTTP_200_OK)
 async def define_new_label(data: create_new_label_body):
     mongo_client = await get_database()
     col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
@@ -36,6 +38,8 @@ async def define_new_label(data: create_new_label_body):
     result = await result.to_list(None)
     if len(result) != 0:
         print(f"Already have {data.label_name}")
+        result[0]["id"] = str(result[0]["_id"])
+        del result[0]["_id"]
         return {
             "message": f"Failed, Already have {data.label_name}",
             "label": result[0]
@@ -46,8 +50,15 @@ async def define_new_label(data: create_new_label_body):
             "label_name": data.label_name,
             "inherit": data.inherit,
             "alias_as": data.alias_as,
-            "label_description": data.label_description,
-            "TimeStamp": datetime.now()
+            "comment": data.comment,
+            "tags": data.tags,
+            "adapter": {
+                "current_adapter_path": "",
+                "training_status": "",
+                "history": [],
+                "update_time": datetime.now(),
+            },
+            "TimeStamp": datetime.now(),
         }
         try:
             result = await col.insert_one(dataToStore)
@@ -60,19 +71,29 @@ async def define_new_label(data: create_new_label_body):
                 "error_msg": str(e)
             }
 
+@router.get("/labels")
+async def get_all_label():
+    mongo_client = await get_database()
+    label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
+
+    labels = await label_define_col.find({}, {"_id": False}).to_list(None)
+    return labels
+
+
 from db.utils import convert_mongo_id
-@router.get("/label/{label_name}")
-async def get_label_by_name(label_name):
+@router.get("/labels/{label_name}", tags = ["Label"])
+async def get_label_by_name(label_name, response: Response):
     mongo_client = await get_database()
     label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
     label_data_col = mongo_client[DATABASE_NAME][Feedback_Label_Collection]
 
     label = await label_define_col.find_one({"label_name": label_name})
-    label = convert_mongo_id(label)
-
     if label == None:
-        pass
-        #return "404"
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {
+            "message": "Failed, Can't find this label name"
+        }
+    label = convert_mongo_id(label)
 
     texts = label_data_col.find(
         {"text_and_labels.labels": {"$in": [label_name] + label["inherit"]}},
@@ -121,7 +142,7 @@ class update_data_body(BaseModel):
 
 from utils.adapter_model import tokenizer as roberta_tokenizer
 
-@router.post("/data/label", tags = ["Optimize Data"], status_code=status.HTTP_200_OK)
+@router.post("/data/label", tags = ["Label"], status_code=status.HTTP_200_OK)
 async def update_labeled_data(data: update_data_body):
     token_and_labels = []
     last_word_index = len(data.texts)-1
@@ -149,15 +170,49 @@ async def update_labeled_data(data: update_data_body):
     return "OK"
 
 
+class retrain_specific_NER_label_body(BaseModel):
+    epochs: int = 2
+    train_data_filter: Any = {}
 
-@router.post("/model/label:retrain/{label_name}", tags = ["ReTrain"], status_code=status.HTTP_200_OK)
-def retrain_specific_label_model(label_name: str):
-    """Re-Train Certain label with existing data."""
+@router.post("/model/label:train/{label_name}", tags = ["Label"], status_code=status.HTTP_202_ACCEPTED)
+async def train_specific_NER_label(label_name: str, body: retrain_specific_NER_label_body, response: Response):
+    """Train Certain label with existing data."""
+
+    # Check if have this label name in DB
+    mongo_client = await get_database()
+    label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
+
+    label = await label_define_col.find_one({"label_name": label_name})
+    if label == None:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {
+            "message": "Failed, Can't find this label name"
+        }
+    label = convert_mongo_id(label)
+
+    label_queue_col = mongo_client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
     dataToStore = {
+        "label_name": label_name,
+        "status": "waiting",
+        "epochs": body.epochs,
+        "train_data_filter": body.train_data_filter,
+        "store_path": "",
+        "train_data_count": -1,
+        "log": [],
+        "TimeStamp": datetime.now(),
+    }
+    try:
+        result = await label_queue_col.insert_one(dataToStore)
+        response.status_code = status.HTTP_202_ACCEPTED
+        return {
+            "message": f"Success, {label_name} now is in Training Queue.",
+            "trace_id": str(result.inserted_id),
+        }
+    except Exception as e:
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {
+            "message": f"Fail, please check the Error Message",
+            "error_msg": str(e)
+        }
 
-    }
-    return {
-        "message": "success, start retrain.",
-        "train-data-amount": 2500,
-        "trace_id": "TBA",
-    }
+    # Update label_name db's training Status
