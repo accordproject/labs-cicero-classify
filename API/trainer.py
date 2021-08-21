@@ -38,9 +38,12 @@ try:
 
     device = torch.device(f"cuda:{NER_TRAIN_DEVIDE_ID}" if torch.cuda.is_available() else "cpu")
 
-
-    #df = get_training_dataframe(NER_TRAIN_DEFAULT_FILTER)
-    df = pd.read_csv("test_csv_df.csv")
+    df = get_training_dataframe(NER_TRAIN_DEFAULT_FILTER)
+    #try:
+    #    df = pd.read_csv("test_csv_df.csv")
+    #except:
+    #    df = get_training_dataframe(NER_TRAIN_DEFAULT_FILTER)
+    
 
     def get_target_df_by_filter(df, train_data_search_filter):
         client = pymongo.MongoClient(MONGODB_URL)
@@ -198,7 +201,7 @@ try:
                     optimizer.step()
                     optimizer.zero_grad()
 
-                    if i % 100 == 0:
+                    if i % 1 == 0:
                         print(f"\tLoss: {loss}")
                         queue_task_log(now_is_training["_id"], f"[At Epoch {epoch} Round {i}] Loss: {loss}")
                 """filename = f"{label_name}_epoch_{epoch}_{dateStamp}"
