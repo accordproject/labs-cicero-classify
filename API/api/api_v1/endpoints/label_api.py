@@ -12,6 +12,7 @@ from db.mongodb import AsyncIOMotorClient, get_database
 import asyncio
 from typing import Any, Dict, AnyStr, List, Union
 from datetime import datetime
+from db.utils import convert_mongo_id
 
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
@@ -53,7 +54,7 @@ async def define_new_label(data: create_new_label_body):
             "comment": data.comment,
             "tags": data.tags,
             "adapter": {
-                "current_adapter_path": "",
+                "current_adapter_filename": "",
                 "training_status": "",
                 "history": [],
                 "update_time": datetime.now(),
@@ -80,7 +81,7 @@ async def get_all_label():
     return labels
 
 
-from db.utils import convert_mongo_id
+
 @router.get("/labels/{label_name}", tags = ["Label"])
 async def get_label_by_name(label_name, response: Response):
     mongo_client = await get_database()
@@ -140,7 +141,7 @@ class update_data_body(BaseModel):
         },
     ]
 
-from utils.adapter_model import tokenizer as roberta_tokenizer
+from utils.tokenizer import tokenizer as roberta_tokenizer
 
 @router.post("/data/label", tags = ["Label"], status_code=status.HTTP_200_OK)
 async def update_labeled_data(data: update_data_body):
@@ -169,50 +170,3 @@ async def update_labeled_data(data: update_data_body):
     result = await col.insert_one(dataToStore)
     return "OK"
 
-
-class retrain_specific_NER_label_body(BaseModel):
-    epochs: int = 2
-    train_data_filter: Any = {}
-
-@router.post("/model/label:train/{label_name}", tags = ["Label"], status_code=status.HTTP_202_ACCEPTED)
-async def train_specific_NER_label(label_name: str, body: retrain_specific_NER_label_body, response: Response):
-    """Train Certain label with existing data."""
-
-    # Check if have this label name in DB
-    mongo_client = await get_database()
-    label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
-
-    label = await label_define_col.find_one({"label_name": label_name})
-    if label == None:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {
-            "message": "Failed, Can't find this label name"
-        }
-    label = convert_mongo_id(label)
-
-    label_queue_col = mongo_client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
-    dataToStore = {
-        "label_name": label_name,
-        "status": "waiting",
-        "epochs": body.epochs,
-        "train_data_filter": body.train_data_filter,
-        "store_path": "",
-        "train_data_count": -1,
-        "log": [],
-        "TimeStamp": datetime.now(),
-    }
-    try:
-        result = await label_queue_col.insert_one(dataToStore)
-        response.status_code = status.HTTP_202_ACCEPTED
-        return {
-            "message": f"Success, {label_name} now is in Training Queue.",
-            "trace_id": str(result.inserted_id),
-        }
-    except Exception as e:
-        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
-        return {
-            "message": f"Fail, please check the Error Message",
-            "error_msg": str(e)
-        }
-
-    # Update label_name db's training Status

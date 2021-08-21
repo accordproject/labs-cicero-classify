@@ -12,8 +12,7 @@ import numpy as np
 
 
 from transformers import RobertaTokenizer
-
-tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+from utils.tokenizer import tokenizer
 
 def encode_batch(batch):
   """Encodes a batch of input data using the model tokenizer."""
