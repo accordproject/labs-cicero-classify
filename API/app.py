@@ -72,15 +72,6 @@ async def get_labeled_data(label_name: str = None, detail: bool = False):
         "data": result
     }
 
-
-# @app.post("/dataset/label/{label_name}")
-# def create_new_dataset_for_the_LabelName(label_name):
-#     return {
-#         "message": "success, start creating dataset.",
-#         "train-data-amount": 2500,
-#         "trace_id": "123456"
-#     }
-
 class text_label_body(BaseModel):
     text: str = example_text
 
@@ -150,7 +141,6 @@ def retrain_template_model():
         "message": "success AAA, start retrain.",
         "train-data-amount": 2500,
     }
-
 
 
 
