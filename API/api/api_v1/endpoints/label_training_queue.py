@@ -6,13 +6,14 @@ from typing import Optional
 from pydantic import BaseModel
 
 from core.config import ALLOWED_HOSTS, PROJECT_NAME, PROJECT_VERSION, API_PORT
-from core.config import DATABASE_NAME, Feedback_Label_Collection, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION
+from core.config import DATABASE_NAME, NER_LABEL_COLLECTION, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION, NER_ADAPTERS_TRAINER_NAME, CONFIG_COLLECTION
 
 from db.mongodb import AsyncIOMotorClient, get_database
 import asyncio
 from typing import Any, Dict, AnyStr, List, Union
 from datetime import datetime
 from db.utils import convert_mongo_id
+from utils.trainer_communicate import set_trainer_restart_required
 
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
@@ -21,18 +22,20 @@ JSONStructure = Union[JSONArray, JSONObject]
 router = APIRouter()
 
 class train_specific_NER_label_body(BaseModel):
+    label_name: str = ""
     epochs: int = 2
     train_data_filter: Any = {}
+    
 
-@router.post("/model/label:train:queue/{label_name}", tags = ["Label"], status_code=status.HTTP_202_ACCEPTED)
-async def train_specific_NER_label(label_name: str, body: train_specific_NER_label_body, response: Response):
+@router.post("/model/label:train:queue/", tags = ["Label"], status_code=status.HTTP_202_ACCEPTED)
+async def train_specific_NER_label(body: train_specific_NER_label_body, response: Response):
     """Train Certain label with existing data."""
 
     # Check if have this label name in DB
     mongo_client = await get_database()
     label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
 
-    label = await label_define_col.find_one({"label_name": label_name})
+    label = await label_define_col.find_one({"label_name": body.label_name})
     if label == None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {
@@ -42,7 +45,7 @@ async def train_specific_NER_label(label_name: str, body: train_specific_NER_lab
 
     label_queue_col = mongo_client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
     dataToStore = {
-        "label_name": label_name,
+        "label_name": body.label_name,
         "status": "waiting",
         "epochs": body.epochs,
         "train_data_filter": body.train_data_filter,
@@ -56,7 +59,7 @@ async def train_specific_NER_label(label_name: str, body: train_specific_NER_lab
         result = await label_queue_col.insert_one(dataToStore)
         response.status_code = status.HTTP_202_ACCEPTED
         return {
-            "message": f"Success, {label_name} now is in Training Queue.",
+            "message": f"Success, {body.label_name} now is in Training Queue.",
             "trace_id": str(result.inserted_id),
         }
     except Exception as e:
@@ -122,3 +125,10 @@ async def track_all_NER_label_training_status(response: Response, train_status: 
     response.status_code = status.HTTP_200_OK
     return all_train_status
 
+@router.put("/model/label:train/restart", tags = ["Label"])
+async def restart_trainer_now(response: Response):
+    await set_trainer_restart_required(True)
+    response.status_code = status.HTTP_202_ACCEPTED
+    return {
+        "message": "Trainer will restart now."
+    }

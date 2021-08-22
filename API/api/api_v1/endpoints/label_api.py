@@ -6,13 +6,14 @@ from typing import Optional
 from pydantic import BaseModel
 
 from core.config import ALLOWED_HOSTS, PROJECT_NAME, PROJECT_VERSION, API_PORT
-from core.config import DATABASE_NAME, Feedback_Label_Collection, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION
+from core.config import DATABASE_NAME, NER_LABEL_COLLECTION, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION
 
 from db.mongodb import AsyncIOMotorClient, get_database
 import asyncio
 from typing import Any, Dict, AnyStr, List, Union
 from datetime import datetime
 from db.utils import convert_mongo_id
+from utils.trainer_communicate import asyncio_update_db_last_modify_time, set_trainer_restart_required
 
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
@@ -86,7 +87,7 @@ async def get_all_label():
 async def get_label_by_name(label_name, response: Response):
     mongo_client = await get_database()
     label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
-    label_data_col = mongo_client[DATABASE_NAME][Feedback_Label_Collection]
+    label_data_col = mongo_client[DATABASE_NAME][NER_LABEL_COLLECTION]
 
     label = await label_define_col.find_one({"label_name": label_name})
     if label == None:
@@ -144,7 +145,7 @@ class update_data_body(BaseModel):
 from utils.tokenizer import tokenizer as roberta_tokenizer
 
 @router.post("/data/label", tags = ["Label"], status_code=status.HTTP_200_OK)
-async def update_labeled_data(data: update_data_body):
+async def update_labeled_data(data: update_data_body, refreash_trainer=False):
     token_and_labels = []
     last_word_index = len(data.texts)-1
     for i, text in enumerate(data.texts):
@@ -166,7 +167,11 @@ async def update_labeled_data(data: update_data_body):
     }
     # todo: Check the label in text all included.
     mongo_client = await get_database()
-    col = mongo_client[DATABASE_NAME][Feedback_Label_Collection]
+    col = mongo_client[DATABASE_NAME][NER_LABEL_COLLECTION]
     result = await col.insert_one(dataToStore)
+    await asyncio_update_db_last_modify_time(NER_LABEL_COLLECTION)
+
+    if refreash_trainer:
+        await set_trainer_restart_required(True)
     return "OK"
 

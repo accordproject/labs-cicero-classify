@@ -145,5 +145,4 @@ cached_*
 *.tar.gz
 
 save_*
-config.py
 API_Debug/*

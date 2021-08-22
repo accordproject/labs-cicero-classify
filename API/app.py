@@ -7,7 +7,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 
 from core.config import ALLOWED_HOSTS, PROJECT_NAME, PROJECT_VERSION, API_PORT
-from core.config import DATABASE_NAME, Feedback_Label_Collection, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION
+from core.config import DATABASE_NAME, NER_LABEL_COLLECTION, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION
 from core.errors import http_422_error_handler, http_error_handler
 from db.mongodb_connect import close_mongo_connection, connect_to_mongo
 from db.mongodb import AsyncIOMotorClient, get_database
@@ -60,7 +60,7 @@ example_text = "Dan Will be deemed to have completed its delivery obligations be
 @app.get("/data/label")
 async def get_labeled_data(label_name: str = None, detail: bool = False):
     mongo_client = await get_database()
-    col = mongo_client[DATABASE_NAME][Feedback_Label_Collection]
+    col = mongo_client[DATABASE_NAME][NER_LABEL_COLLECTION]
     
     result = col.find({"text_and_labels.labels": {"$in": [label_name]}},
                       {"text_and_labels": detail})

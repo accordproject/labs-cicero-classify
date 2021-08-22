@@ -2,7 +2,7 @@ import pandas as pd
 import pymongo
 import numpy as np
 
-from core.config import MONGODB_URL,DATABASE_NAME, Feedback_Label_Collection, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION
+from core.config import MONGODB_URL,DATABASE_NAME, NER_LABEL_COLLECTION, LABEL_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION, CONFIG_COLLECTION, NER_TRAINER_DATA_CATCH_FILE, NER_ADAPTERS_TRAINER_NAME
 
 from torch.utils.data import Dataset
 import torch
@@ -12,18 +12,58 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
 from tqdm import tqdm
+import os
 
 client = pymongo.MongoClient(MONGODB_URL)
 def get_training_dataframe(train_data_search_filter = {}):
-    col = client[DATABASE_NAME][Feedback_Label_Collection]
+    try: #load from cache
+        client = pymongo.MongoClient(MONGODB_URL)
+        config_col = client[DATABASE_NAME][CONFIG_COLLECTION]
+        trainer = config_col.find_one({
+            "name": NER_ADAPTERS_TRAINER_NAME
+        })
+        
+        train_dataset = config_col.find_one({
+            "collection_name": NER_LABEL_COLLECTION
+        })
+        if train_dataset["last_update_time"] == trainer["last_data_cache_timestamp"]:
+            print("Read Data from Cache...")
+            df = pd.read_csv(trainer["data_cache_path"])
+            return df
+        else: # new update, no cache
+            os.remove(NER_TRAINER_DATA_CATCH_FILE)
+    except Exception as e:
+        print(e)
+        pass
+
+    col = client[DATABASE_NAME][NER_LABEL_COLLECTION]
 
     result = col.find(train_data_search_filter)
     print("Reading Data from MongoDB...")
-    df = pd.DataFrame()
+    dfs = []
     for i, sentence in enumerate(tqdm(result, total = col.count_documents(train_data_search_filter))):
+        if i%100 == 0:
+            if i != 0: dfs.append(df)
+            df = pd.DataFrame()
         sentense_df = pd.DataFrame(columns=["Sentence #", "text", "labels"], data = sentence["text_and_labels"])
         sentense_df["Sentence #"] = str(sentence["_id"])
         df = df.append(sentense_df)
+    dfs.append(df)   
+    print("Loading Data to DataFrame")
+    final_df = pd.DataFrame(columns=["Sentence #", "text", "labels"])
+    for df in tqdm(dfs):
+        final_df = final_df.append(df)
+    
+    final_df.to_csv(NER_TRAINER_DATA_CATCH_FILE)
+    config_col.update_one({
+        "name": NER_ADAPTERS_TRAINER_NAME
+    }, {
+        "$set": {
+            "last_data_cache_timestamp": train_dataset["last_update_time"],
+            "data_cache_path": NER_TRAINER_DATA_CATCH_FILE,
+            }
+    })
+    return final_df
 
 def get_training_data_by_df_according_to_label_name(df, label_name):
     label_col = client[DATABASE_NAME][LABEL_COLLECTION]

@@ -1,3 +1,7 @@
+from core.config import CONFIG_COLLECTION
+from utils.trainer_communicate import update_trainer_pid
+import os
+update_trainer_pid(os.getpid())
 try:
     import pandas as pd
     import pymongo
@@ -7,7 +11,7 @@ try:
     from core.config import (
         MONGODB_URL,
         DATABASE_NAME,
-        Feedback_Label_Collection,
+        NER_LABEL_COLLECTION,
         LABEL_COLLECTION,
         LABEL_RETRAIN_QUEUE_COLLECTION,
         NER_TRAIN_BATCH_SIZE,
@@ -22,7 +26,6 @@ try:
     import re
     import sys
 
-    import os
     import datetime
     # When Each Train
     # Run When Set Up
@@ -33,21 +36,16 @@ try:
 
     dateStamp = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z")
 
+    
+    device = torch.device(f"cuda:{NER_TRAIN_DEVIDE_ID}" if torch.cuda.is_available() else "cpu")
+
+    df = get_training_dataframe(NER_TRAIN_DEFAULT_FILTER)    
     from transformers import RobertaTokenizer
     tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
-    device = torch.device(f"cuda:{NER_TRAIN_DEVIDE_ID}" if torch.cuda.is_available() else "cpu")
-
-    df = get_training_dataframe(NER_TRAIN_DEFAULT_FILTER)
-    #try:
-    #    df = pd.read_csv("test_csv_df.csv")
-    #except:
-    #    df = get_training_dataframe(NER_TRAIN_DEFAULT_FILTER)
-    
-
     def get_target_df_by_filter(df, train_data_search_filter):
         client = pymongo.MongoClient(MONGODB_URL)
-        col = client[DATABASE_NAME][Feedback_Label_Collection]
+        col = client[DATABASE_NAME][NER_LABEL_COLLECTION]
 
         wanted_id = list(map(lambda x: str(x["_id"]),
                              list(col.find(train_data_search_filter, {"_id": True}))))
@@ -98,7 +96,7 @@ try:
         training_queue = list(training_queue)
 
         if len(training_queue) == 0:
-            break
+            sys.exit(0)
 
         # Old Train First
         training_queue.sort(key = lambda x: x["add_time"], reverse= False)
@@ -113,7 +111,7 @@ try:
         target_df = get_target_df_by_filter(df, train_data_search_filter)
         trainset = NER_Dataset_for_Adapter(tokenizer, target_df, label_name)
 
-        log_msg = f"Start training {label_name}, have {len(training_queue) -1} in the waiting line..."
+        log_msg = f"Start training {label_name} with batch_size={NER_TRAIN_BATCH_SIZE} and epoch={Epoch_Times}, have {len(training_queue) -1} in the waiting line..."
         trainer_log(log_msg)
         queue_task_log(now_is_training["_id"], log_msg)
 
@@ -202,7 +200,7 @@ try:
                     optimizer.zero_grad()
 
                     if i % 1 == 0:
-                        print(f"\tLoss: {loss}")
+                        #if i % 100 == 0: print(f"\tLoss: {loss}")
                         queue_task_log(now_is_training["_id"], f"[At Epoch {epoch} Round {i}] Loss: {loss}")
                 """filename = f"{label_name}_epoch_{epoch}_{dateStamp}"
                 model.save_adapter(f"{NER_ADAPTERS_PATH}/save_adapters/{filename}", model.active_adapters[0])
@@ -240,4 +238,8 @@ try:
                     "time": now_time,
                 }}})
 except KeyboardInterrupt:
-    pass
+    sys.exit(0)
+except Exception as e:
+    print(e)
+print("FFFFF")
+sys.exit(1)

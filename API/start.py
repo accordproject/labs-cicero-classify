@@ -10,7 +10,7 @@ slient_commands = [
 ]
     
 commands = [
-    f"""cd {PATH};eval "$(conda shell.bash hook)";conda activate {ANACONDA_ENV_NAME};python trainer_runner.py;""",
+    f"""cd {PATH};eval "$(conda shell.bash hook)";conda activate {ANACONDA_ENV_NAME};python NER_trainer_runner.py;""",
     #f"""cd {PATH};eval "$(conda shell.bash hook)";conda activate {ANACONDA_ENV_NAME};uvicorn app:app --port {API_PORT} --host {API_HOST} --workers {API_WORKER};""",
 ]
 
