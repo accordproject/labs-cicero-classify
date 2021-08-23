@@ -127,3 +127,22 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#Eason's Preference setup
+.ipynb_checkpoints
+test_
+node_modules
+test_*
+*.onnx
+*.pt
+*.bin
+checkpoint*
+*_epc/
+cached_*
+*.csv
+*.tsv
+*.zip
+*.tar.gz
+
+save_*
+API_Debug/*
