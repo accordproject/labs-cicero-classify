@@ -28,12 +28,18 @@ async def set_trainer_restart_required(restart_required):
     })
 
 
-def update_trainer_pid(pid):
+def update_pid(name, pid):
     from pymongo import MongoClient
     mongo_client = MongoClient(MONGODB_URL)
     config_col = mongo_client[DATABASE_NAME][CONFIG_COLLECTION]
-    config_col.update_one({
-        "name": NER_ADAPTERS_TRAINER_NAME,
+    result = config_col.update_one({
+        "name": name,
     },{
         "$set": {"pid": pid},
     })
+    if result.modified_count == 0:
+        config_col.insert_one({
+            "name": name,
+            "pid": pid,
+        })
+    return True

@@ -1,3 +1,5 @@
+import threading
+from typing import Any
 import pandas as pd
 import numpy as np
 import torch
@@ -11,7 +13,6 @@ print(f"Loading adapter model...")
 import numpy as np
 
 
-
 from transformers import RobertaTokenizer
 from utils.tokenizer import tokenizer
 
@@ -22,47 +23,42 @@ def encode_batch(batch):
 from utils.ner_dataset import get_trainset_data_loader
 
 from transformers import RobertaConfig, RobertaModelWithHeads
-
-config = RobertaConfig.from_pretrained("roberta-base")
-model = RobertaModelWithHeads.from_pretrained(
-    "roberta-base",
-    config=config,
-)
-
 import os
-
-# This is a asyncio status, but just use mongo client directly to save develop time
-from pymongo import MongoClient
-from core.config import MONGODB_URL, DATABASE_NAME, LABEL_COLLECTION, NER_ADAPTERS_PATH
-mongo_client = MongoClient(MONGODB_URL)
-labels_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
-
-labels = labels_col.find()
-
-labels = list(labels)
-
-all_adapters = []
-for label in labels:
-    if label["adapter"]["current_adapter_filename"]:
-        all_adapters.append(label["adapter"]["current_adapter_filename"])
-#adapter_name_in_dir = os.listdir("./save_adapters/")
-all_adapter_name = []
-for adapter_name in all_adapters:
-    name = model.load_adapter(f"{NER_ADAPTERS_PATH}/save_adapters/{adapter_name}")
-    all_adapter_name.append(name)
-    model.load_head(f"{NER_ADAPTERS_PATH}/save_heads/{adapter_name}")
-
 import re
+def load_model(local_, var_name = "model"):
+    config = RobertaConfig.from_pretrained("roberta-base")
+    model = RobertaModelWithHeads.from_pretrained(
+        "roberta-base",
+        config=config,
+    )
+    
+    
+    adapter_name_in_dir = os.listdir("./save_adapters/")
+    adapter_name_in_dir = adapter_name_in_dir[:20]
+    all_adapter_name = []
+    for adapter_name in adapter_name_in_dir:
+        name = model.load_adapter(f"./save_adapters/{adapter_name}")
+        all_adapter_name.append(name)
+        model.load_head(f"./save_heads/{adapter_name}")
 
-parallel_text = "','".join(all_adapter_name)
-result = re.findall(r'[;|(|)]',parallel_text)
-if len(result) != 0:
-    raise(ValueError("Adapter Name must not contain \"" + '\", \"'.join(result) + '"'))
+    
 
-from transformers.adapters.composition import Parallel
-parallel = eval("Parallel('" + "','".join(all_adapter_name) + "')")
+    parallel_text = "','".join(all_adapter_name)
+    result = re.findall(r'[;|(|)]',parallel_text)
+    if len(result) != 0:
+        raise(ValueError("Adapter Name must not contain \"" + '\", \"'.join(result) + '"'))
 
-model.set_active_adapters(parallel)
+    from transformers.adapters.composition import Parallel
+    parallel = eval("Parallel('" + "','".join(all_adapter_name) + "')")
+
+    model.set_active_adapters(parallel)
+    
+    local_["model"] = model
+
+model = None
+t = threading.Thread(target = load_model, args=(locals(),))
+t.start()
+print("THREAD!!!")
 
 device = "cpu"
 
@@ -77,8 +73,10 @@ def get_adapter_mapping(model):
 
 
 
-def model_predict(model, sentence, device = "cpu"):
+def predict(sentence, model = model, device = "cpu"):
     # Check if there is update, if yes, then reload the model.
+    if model == None:
+        return None
     tokenized_sentence = torch.tensor([tokenizer.encode(sentence)])
     pos = torch.tensor([[0] * len(tokenized_sentence)])
     tags = torch.tensor([[1] * len(tokenized_sentence)])

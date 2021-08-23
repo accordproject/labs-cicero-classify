@@ -1,7 +1,3 @@
-from core.config import CONFIG_COLLECTION
-from utils.trainer_communicate import update_trainer_pid
-import os
-update_trainer_pid(os.getpid())
 try:
     import pandas as pd
     import pymongo
@@ -9,6 +5,7 @@ try:
     import torch
 
     from core.config import (
+        NER_ADAPTERS_TRAINER_NAME,
         MONGODB_URL,
         DATABASE_NAME,
         NER_LABEL_COLLECTION,
@@ -25,10 +22,13 @@ try:
     from utils.trainer.NER import get_training_dataframe, NER_Dataset_for_Adapter
     import re
     import sys
-
     import datetime
+    from utils.trainer_communicate import update_pid
+
+    import os
     # When Each Train
     # Run When Set Up
+    update_pid(NER_ADAPTERS_TRAINER_NAME, os.getpid())
     if os.path.isdir(f"{NER_ADAPTERS_PATH}/save_adapters") == False:
         os.mkdir(f"{NER_ADAPTERS_PATH}/save_adapters")
     if os.path.isdir(f"{NER_ADAPTERS_PATH}/save_heads") == False:
@@ -238,7 +238,7 @@ try:
                     "time": now_time,
                 }}})
 except KeyboardInterrupt:
-    sys.exit(0)
+    sys.exit(1)
 except Exception as e:
     print(e)
 print("FFFFF")

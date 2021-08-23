@@ -27,7 +27,7 @@ class train_specific_NER_label_body(BaseModel):
     train_data_filter: Any = {}
     
 
-@router.post("/model/label:train:queue/", tags = ["Label"], status_code=status.HTTP_202_ACCEPTED)
+@router.post("/model/label:train:queue/", tags = ["NER Label Retrain"], status_code=status.HTTP_202_ACCEPTED)
 async def train_specific_NER_label(body: train_specific_NER_label_body, response: Response):
     """Train Certain label with existing data."""
 
@@ -72,7 +72,7 @@ async def train_specific_NER_label(body: train_specific_NER_label_body, response
     # Update label_name db's training Status
 
 from bson.objectid import ObjectId
-@router.get("/model/label:train:queue/id/{trace_id}", tags = ["Label"])
+@router.get("/model/label:train:queue/id/{trace_id}", tags = ["NER Label Retrain"])
 async def track_specific_NER_label_training_status(trace_id: str, response: Response):
     mongo_client = await get_database()
     label_queue_col = mongo_client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
@@ -83,7 +83,7 @@ async def track_specific_NER_label_training_status(trace_id: str, response: Resp
     return train_status
     
 from bson.objectid import ObjectId
-@router.delete("/model/label:train:queue/id/{trace_id}", tags = ["Label"])
+@router.delete("/model/label:train:queue/id/{trace_id}", tags = ["NER Label Retrain"])
 async def track_specific_NER_label_training_status(trace_id: str, response: Response):
     mongo_client = await get_database()
     label_queue_col = mongo_client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
@@ -96,7 +96,7 @@ async def track_specific_NER_label_training_status(trace_id: str, response: Resp
         response.status_code = status.HTTP_304_NOT_MODIFIED
         return {}
 
-@router.get("/model/label:train:queue/{train_status}", tags = ["Label"])
+@router.get("/model/label:train:queue/{train_status}", tags = ["NER Label Retrain"])
 async def track_all_NER_label_training_status(response: Response, train_status: str = 'waiting'):
     """# Get NER Label Training Status by train_status\ntrain_status = ["training", "waiting", "done", "all"]"""
     status_options = ["training", "waiting", "done", "all"]
@@ -112,7 +112,7 @@ async def track_all_NER_label_training_status(response: Response, train_status: 
     
     mongo_client = await get_database()
     label_queue_col = mongo_client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
-    all_train_status = label_queue_col.find(search_filter)
+    all_train_status = label_queue_col.find(search_filter, {"logs": False})
     all_train_status = await all_train_status.to_list(None)
 
     def replace_mongo_id_to_trace_id(x):
@@ -125,8 +125,8 @@ async def track_all_NER_label_training_status(response: Response, train_status: 
     response.status_code = status.HTTP_200_OK
     return all_train_status
 
-@router.put("/model/label:train/restart", tags = ["Label"])
-async def restart_trainer_now(response: Response):
+@router.put("/model/label:train/restart", tags = ["NER Label Retrain"])
+async def restart_label_trainer_now(response: Response):
     await set_trainer_restart_required(True)
     response.status_code = status.HTTP_202_ACCEPTED
     return {

@@ -12,26 +12,30 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
 from tqdm import tqdm
+
+import swifter
 import os
 
 client = pymongo.MongoClient(MONGODB_URL)
-def get_training_dataframe(train_data_search_filter = {}):
+def get_training_dataframe(train_data_search_filter = {}, cache = True):
     try: #load from cache
         client = pymongo.MongoClient(MONGODB_URL)
-        config_col = client[DATABASE_NAME][CONFIG_COLLECTION]
+        config_col = client[DATABASE_NAME][CONFIG_COLLECTION] 
         trainer = config_col.find_one({
             "name": NER_ADAPTERS_TRAINER_NAME
         })
-        
         train_dataset = config_col.find_one({
             "collection_name": NER_LABEL_COLLECTION
-        })
-        if train_dataset["last_update_time"] == trainer["last_data_cache_timestamp"]:
-            print("Read Data from Cache...")
-            df = pd.read_csv(trainer["data_cache_path"])
-            return df
-        else: # new update, no cache
-            os.remove(NER_TRAINER_DATA_CATCH_FILE)
+        }) 
+        if cache:
+            if train_dataset["last_update_time"] == trainer["last_data_cache_timestamp"]:
+                print("Reading Data from Cache...")
+                df = pd.read_csv(trainer["data_cache_path"])
+                df["labels"] = df["cache_labels"].swifter.progress_bar(False).apply(lambda x: x.split("|"))
+                del df["cache_labels"]
+                return df
+            else: # new update, no cache
+                os.remove(NER_TRAINER_DATA_CATCH_FILE)
     except Exception as e:
         print(e)
         pass
@@ -41,20 +45,35 @@ def get_training_dataframe(train_data_search_filter = {}):
     result = col.find(train_data_search_filter)
     print("Reading Data from MongoDB...")
     dfs = []
+    df_columns = ["Sentence #", "token", "labels"]
     for i, sentence in enumerate(tqdm(result, total = col.count_documents(train_data_search_filter))):
-        if i%100 == 0:
+        if i%50 == 0:
             if i != 0: dfs.append(df)
             df = pd.DataFrame()
-        sentense_df = pd.DataFrame(columns=["Sentence #", "text", "labels"], data = sentence["text_and_labels"])
+        sentense_df = pd.DataFrame(columns = df_columns, data = sentence["token_and_labels"])
         sentense_df["Sentence #"] = str(sentence["_id"])
         df = df.append(sentense_df)
-    dfs.append(df)   
+    dfs.append(df)
     print("Loading Data to DataFrame")
-    final_df = pd.DataFrame(columns=["Sentence #", "text", "labels"])
+    while len(dfs) > 50:
+        new_dfs = []
+        tmp_df = pd.DataFrame(columns = df_columns)
+        for i, df in enumerate((dfs)):
+            if i%50 == 0:
+                if i != 0: new_dfs.append(tmp_df)
+                tmp_df = pd.DataFrame()
+            tmp_df = tmp_df.append(df)
+        new_dfs.append(tmp_df)
+        dfs = new_dfs
+    final_df = pd.DataFrame(columns = df_columns)
     for df in tqdm(dfs):
         final_df = final_df.append(df)
-    
-    final_df.to_csv(NER_TRAINER_DATA_CATCH_FILE)
+    final_df = final_df.reset_index(drop=True)
+    # Cache
+    final_df["cache_labels"] = final_df["labels"].swifter.progress_bar(False).apply(lambda x: "|".join(x))
+    final_df.to_csv(NER_TRAINER_DATA_CATCH_FILE, index=False,
+                    columns = df_columns - ["labels"] + ["cache_labels"])
+    del final_df["cache_labels"]
     config_col.update_one({
         "name": NER_ADAPTERS_TRAINER_NAME
     }, {
@@ -86,7 +105,7 @@ def get_training_data_by_df_according_to_label_name(df, label_name):
 
     df[label_name] = list(df["labels"].apply(label_data))
 
-    sentences = df.groupby("Sentence #")["text"].apply(list).values
+    sentences = df.groupby("Sentence #")["token"].apply(list).values
     tags = df.groupby("Sentence #")[label_name].apply(list).values
     return sentences, tags
 
@@ -97,7 +116,6 @@ class NER_Dataset_for_Adapter(Dataset):
         # 大數據你會需要用 iterator=True
         self.sentences, self.tags = get_training_data_by_df_according_to_label_name(df, label_name)
         self.len = len(self.sentences)
-
 
         labels = ["O", label_name]
 

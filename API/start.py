@@ -34,7 +34,7 @@ for command in commands:
 
 while True:
     try:
-        time.sleep(1)
+        time.sleep(SLEEP_INTERVAL_SECOND)
     except KeyboardInterrupt:
         for process in processes:
             process.send_signal(signal.SIGINT)

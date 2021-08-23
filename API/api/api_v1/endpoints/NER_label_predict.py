@@ -20,10 +20,10 @@ class text_label_body(BaseModel):
     text: str = example_text
 
 
-
-@router.post("/model/label", tags = ["Predict"], status_code=status.HTTP_200_OK)
+NER_LABEL_PREDICT_API_TAG = ["NER Label Predict"]
+@router.post("/model/label", tags = NER_LABEL_PREDICT_API_TAG, status_code=status.HTTP_200_OK)
 def text_label(data: text_label_body):
-    sen, pred, logits, logits_order = adapter_model.model_predict(adapter_model.model, data.text)
+    sen, pred, logits, logits_order = adapter_model.predict(data.text)
     out_Tokens = []
     for i, _ in enumerate(sen):
         predictions = []
@@ -37,9 +37,11 @@ def text_label(data: text_label_body):
             "token": sen[i],
             "predictions": predictions,
         })
-    return out_Tokens
+    return {
+        "prediction": out_Tokens
+    }
 
-@router.get("/model/label", tags = ["Status"], status_code=status.HTTP_200_OK)
+@router.get("/model/label", tags = NER_LABEL_PREDICT_API_TAG, status_code=status.HTTP_200_OK)
 def get_model_status():
     return {
         "message": "get success",

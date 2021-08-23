@@ -55,3 +55,7 @@ PATH = os.getcwd()
 # CACHE
 NER_TRAINER_DATA_CATCH_FILE=f"{PATH}/cache/NER_TRAINER_DATA_CATCH.csv"
 NER_ADAPTERS_TRAINER_NAME = "NER_adapter_trainer"
+NER_TRAINER_RUNNER_NAME = "NER_trainer_runner"
+
+# API Version
+API_V1_PREFIX="/api/v1"

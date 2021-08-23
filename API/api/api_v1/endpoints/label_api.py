@@ -14,12 +14,13 @@ from typing import Any, Dict, AnyStr, List, Union
 from datetime import datetime
 from db.utils import convert_mongo_id
 from utils.trainer_communicate import asyncio_update_db_last_modify_time, set_trainer_restart_required
-
+import re
 JSONObject = Dict[AnyStr, Any]
 JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 
 router = APIRouter()
+LABEL_API_TAGS = ["Label"]
 
 example_text = "Dan Will be deemed to have completed its delivery obligations before 2021-7-5 if in Niall's opinion, the Jeep Car satisfies the Acceptance Criteria, and Niall notifies Dan in writing that it is accepting the Jeep Car."
 
@@ -32,8 +33,15 @@ class create_new_label_body(BaseModel):
     tags: list = []
 
 
-@router.post("/labels", tags = ["Label"], status_code=status.HTTP_200_OK)
-async def define_new_label(data: create_new_label_body):
+@router.post("/labels", tags = LABEL_API_TAGS, status_code=status.HTTP_200_OK)
+async def define_new_label(response: Response, data: create_new_label_body):
+    result = re.findall(r'[;|(|)]',data.label_name)
+    if len(result) != 0:
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {
+            "message": "Label Name must not contain \"" + '\", \"'.join(result) + '"'
+        }
+
     mongo_client = await get_database()
     col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
     result = col.find({"label_name": data.label_name})
@@ -64,6 +72,7 @@ async def define_new_label(data: create_new_label_body):
         }
         try:
             result = await col.insert_one(dataToStore)
+            response.status_code = status.HTTP_201_CREATED
             return {
                 "message": f"Success, new label {data.label_name} added."
             }
@@ -73,7 +82,7 @@ async def define_new_label(data: create_new_label_body):
                 "error_msg": str(e)
             }
 
-@router.get("/labels")
+@router.get("/labels", tags = LABEL_API_TAGS)
 async def get_all_label():
     mongo_client = await get_database()
     label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
@@ -83,7 +92,7 @@ async def get_all_label():
 
 
 
-@router.get("/labels/{label_name}", tags = ["Label"])
+@router.get("/labels/{label_name}", tags = LABEL_API_TAGS)
 async def get_label_by_name(label_name, response: Response):
     mongo_client = await get_database()
     label_define_col = mongo_client[DATABASE_NAME][LABEL_COLLECTION]
@@ -144,7 +153,7 @@ class update_data_body(BaseModel):
 
 from utils.tokenizer import tokenizer as roberta_tokenizer
 
-@router.post("/data/label", tags = ["Label"], status_code=status.HTTP_200_OK)
+@router.post("/data/label", tags = LABEL_API_TAGS, status_code=status.HTTP_200_OK)
 async def update_labeled_data(data: update_data_body, refreash_trainer=False):
     token_and_labels = []
     last_word_index = len(data.texts)-1
@@ -157,7 +166,7 @@ async def update_labeled_data(data: update_data_body, refreash_trainer=False):
         for j, token in enumerate(tokens):
             token_and_labels.append({
                 "token": token,
-                "label": text["labels"]
+                "labels": text["labels"]
             })
     dataToStore = {
         "user": data.user,
@@ -175,3 +184,20 @@ async def update_labeled_data(data: update_data_body, refreash_trainer=False):
         await set_trainer_restart_required(True)
     return "OK"
 
+
+@router.get("/data/label", tags = LABEL_API_TAGS)
+async def get_labeled_data(label_name: str = None, detail: bool = False, start: int = 0, end: int = 10):
+    if end == -1 and start == -1: end = None
+    mongo_client = await get_database()
+    col = mongo_client[DATABASE_NAME][NER_LABEL_COLLECTION]
+    
+    result = col.find({"text_and_labels.labels": {"$in": [label_name]}},
+                      {"text_and_labels": detail})
+    
+    result = await result.to_list(end)
+    result = result[start:end]
+    result = list(map(convert_mongo_id,result))
+    return {
+        "message": "Success",
+        "data": result
+    }

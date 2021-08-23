@@ -7,7 +7,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 
 from core.config import ALLOWED_HOSTS, PROJECT_NAME, PROJECT_VERSION, API_PORT
-from core.config import DATABASE_NAME, NER_LABEL_COLLECTION, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION
+from core.config import DATABASE_NAME, NER_LABEL_COLLECTION, Feedback_Template_Collection, Feedback_Suggestion_Collection, LABEL_COLLECTION, API_V1_PREFIX
 from core.errors import http_422_error_handler, http_error_handler
 from db.mongodb_connect import close_mongo_connection, connect_to_mongo
 from db.mongodb import AsyncIOMotorClient, get_database
@@ -53,54 +53,12 @@ JSONStructure = Union[JSONArray, JSONObject]
 
 
 from api.api_v1.api import router as api_router
-app.include_router(api_router)
+app.include_router(api_router, prefix=API_V1_PREFIX)
 
 example_text = "Dan Will be deemed to have completed its delivery obligations before 2021-7-5 if in Niall's opinion, the Jeep Car satisfies the Acceptance Criteria, and Niall notifies Dan in writing that it is accepting the Jeep Car."
 
-@app.get("/data/label")
-async def get_labeled_data(label_name: str = None, detail: bool = False):
-    mongo_client = await get_database()
-    col = mongo_client[DATABASE_NAME][NER_LABEL_COLLECTION]
-    
-    result = col.find({"text_and_labels.labels": {"$in": [label_name]}},
-                      {"text_and_labels": detail})
-    
-    result = await result.to_list(None)
-    result = list(map(convert_mongo_id,result))
-    return {
-        "message": "Success",
-        "data": result
-    }
-
 class text_label_body(BaseModel):
     text: str = example_text
-
-@app.post("/model/template", tags = ["Predict"], status_code=status.HTTP_200_OK)
-def recommand_template(data: text_label_body):
-    return {
-        "predict": [
-            {
-                "name": "Full Payment Upon Demand",
-                "confidence": 0.9
-            },
-            {
-                "name": "Acceptance of Delivery",
-                "confidence": 0.8
-            },
-            {
-                "name": "Copyright License",
-                "confidence": 0.7
-            },
-            {
-                "name": "Demand Forecast",
-                "confidence": 0.6
-            },
-            {
-                "name": "Eat Apples",
-                "confidence": 0.5
-            },
-        ]
-    }
 
 
 

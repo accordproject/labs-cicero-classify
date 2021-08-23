@@ -5,13 +5,19 @@ import os
 import subprocess
 import signal
 import time
-from core.config import MONGODB_URL, DATABASE_NAME, CONFIG_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION, API_PORT, API_HOST, API_WORKER, SLEEP_INTERVAL_SECOND, ANACONDA_ENV_NAME, PATH, NER_ADAPTERS_TRAINER_NAME
+from core.config import MONGODB_URL, DATABASE_NAME, CONFIG_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION, API_PORT, API_HOST, API_WORKER, SLEEP_INTERVAL_SECOND, ANACONDA_ENV_NAME, PATH, NER_ADAPTERS_TRAINER_NAME, NER_TRAINER_RUNNER_NAME
+from utils.trainer_communicate import update_pid
+
+update_pid(NER_TRAINER_RUNNER_NAME, os.getpid())
+
 
 client = pymongo.MongoClient(MONGODB_URL)
 
 from utils.logs import config_log, change_service_status
 
 config_col = client[DATABASE_NAME][CONFIG_COLLECTION]
+
+
 
 trainer = config_col.find_one({"name": NER_ADAPTERS_TRAINER_NAME})
 
@@ -48,12 +54,10 @@ def run_trainer():
                 break
             try:
                 poll = process.poll()
-                int(poll)
-                if poll == 1:
-                    return_status = f"Finish with code {poll}"
+                poll = int(poll)
                 if poll == 0:
-                    return_status = f"Interrupt with code {poll}"
-                if poll == 4:
+                    return_status = f"Finish with code {poll}"
+                elif poll == 4:
                     return_status = f"Error with code {poll}, CUDA out of memory!"
                     time.sleep(600) #if out of memory, don't keep try it...
                 else:
@@ -103,3 +107,4 @@ while True:
         time.sleep(SLEEP_INTERVAL_SECOND)
     except KeyboardInterrupt:
         print("NER Trainer Runner Stop!")
+        break
