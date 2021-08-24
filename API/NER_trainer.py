@@ -119,7 +119,7 @@ try:
                 "_id": now_is_training["_id"],
             },{
                 "$set": {
-                    "status": "training",
+                    "status": "training new one",
                     "train_data_count": len(trainset)
                 }
             })
@@ -127,9 +127,10 @@ try:
         label_define_col = client[DATABASE_NAME][LABEL_COLLECTION]
         label_define_col.update_one(
             {"label_name": label_name},
-            {"$set": {"adapter.current_adapter_filename": f"{label_name}_epoch_{Epoch_Times}_{dateStamp}",
-                    "adapter.training_status": "training a new one",
-            }})
+            {"$set": {
+                "adapter.training_status": "training",
+                }
+            })
 
         trainloader = DataLoader(trainset, batch_size=NER_TRAIN_BATCH_SIZE, 
                                  collate_fn=create_mini_batch)
@@ -229,13 +230,14 @@ try:
         now_time = datetime.datetime.now()
         label_define_col.update_one(
             {"label_name": label_name},
-            {"$set": {"adapter.current_adapter_filename": f"{label_name}_epoch_{Epoch_Times}_{dateStamp}",
+            {"$set": {"adapter.lastest_filename": f"{label_name}_epoch_{Epoch_Times}_{dateStamp}",
                       "adapter.training_status": "done",
                       "adapter.update_time": now_time,
                 },
              "$push": {"adapter.history": {
-                    "adapter_filename": f"{label_name}_epoch_{Epoch_Times}_{dateStamp}",
+                    "filename": f"{label_name}_epoch_{Epoch_Times}_{dateStamp}",
                     "time": now_time,
+                    "trainer_job_id": now_is_training["_id"],
                 }}})
 except KeyboardInterrupt:
     sys.exit(1)

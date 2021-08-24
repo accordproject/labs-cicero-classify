@@ -63,12 +63,12 @@ async def define_new_label(response: Response, data: create_new_label_body):
             "comment": data.comment,
             "tags": data.tags,
             "adapter": {
-                "current_adapter_filename": "",
+                "lastest_filename": "",
                 "training_status": "",
                 "history": [],
                 "update_time": datetime.now(),
             },
-            "TimeStamp": datetime.now(),
+            "create_time": datetime.now(),
         }
         try:
             result = await col.insert_one(dataToStore)
@@ -153,7 +153,7 @@ class update_data_body(BaseModel):
 
 from utils.tokenizer import tokenizer as roberta_tokenizer
 
-@router.post("/data/label", tags = LABEL_API_TAGS, status_code=status.HTTP_200_OK)
+@router.post("/data/labeledText", tags = LABEL_API_TAGS, status_code=status.HTTP_200_OK)
 async def update_labeled_data(data: update_data_body, refreash_trainer=False):
     token_and_labels = []
     last_word_index = len(data.texts)-1
@@ -185,7 +185,7 @@ async def update_labeled_data(data: update_data_body, refreash_trainer=False):
     return "OK"
 
 
-@router.get("/data/label", tags = LABEL_API_TAGS)
+@router.get("/data/labeledText", tags = LABEL_API_TAGS)
 async def get_labeled_data(label_name: str = None, detail: bool = False, start: int = 0, end: int = 10):
     if end == -1 and start == -1: end = None
     mongo_client = await get_database()

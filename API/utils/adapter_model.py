@@ -42,9 +42,25 @@ labels = labels_col.find()
 labels = list(labels)
 
 all_adapters = []
+
+def check_adapter_filename_valid(filename):
+    if (os.path.isdir(f"{NER_ADAPTERS_PATH}/save_adapters/{filename}") and
+        os.path.isdir(f"{NER_ADAPTERS_PATH}/save_heads/{filename}")):
+        return True
+    else:
+        return False
+
 for label in labels:
-    if label["adapter"]["current_adapter_filename"]:
-        all_adapters.append(label["adapter"]["current_adapter_filename"])
+    if label["adapter"]["lastest_filename"]:
+        filename = label["adapter"]["lastest_filename"]
+        if check_adapter_filename_valid(filename) == False:
+            while len(label["adapter"]["history"]) > 0:
+                hisotry_adapter = label["adapter"]["history"].pop(0)
+                filename = hisotry_adapter["filename"]
+                if check_adapter_filename_valid(filename):
+                    print(f"""Label {label["label_name"]} will use a history one "{filename}" because current one unavailable.""")
+                    break
+        all_adapters.append(filename)
 #adapter_name_in_dir = os.listdir("./save_adapters/")
 all_adapter_name = []
 for adapter_name in all_adapters:
