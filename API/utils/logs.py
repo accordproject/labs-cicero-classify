@@ -1,12 +1,12 @@
 import pymongo
 import datetime
-from core.config import MONGODB_URL, DATABASE_NAME, CONFIG_COLLECTION, TRAINER_LOG_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION
+from core.config import MONGODB_URL, DATABASE_NAME, CONFIG_COLLECTION, TRAINER_LOG_COLLECTION, LABEL_TRAIN_JOB_COLLECTION
 
 client = pymongo.MongoClient(MONGODB_URL)
 
 config_col = client[DATABASE_NAME][CONFIG_COLLECTION]
 trainer_log_col = client[DATABASE_NAME][TRAINER_LOG_COLLECTION]
-training_queue_col = client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
+training_queue_col = client[DATABASE_NAME][LABEL_TRAIN_JOB_COLLECTION]
 
 def config_log(name, message):
     config_col.update_one({
