@@ -5,7 +5,7 @@ import os
 import subprocess
 import signal
 import time
-from core.config import MONGODB_URL, DATABASE_NAME, CONFIG_COLLECTION, LABEL_RETRAIN_QUEUE_COLLECTION, API_PORT, API_HOST, API_WORKER, SLEEP_INTERVAL_SECOND, ANACONDA_ENV_NAME, PATH, NER_ADAPTERS_TRAINER_NAME, NER_TRAINER_RUNNER_NAME
+from core.config import MONGODB_URL, DATABASE_NAME, CONFIG_COLLECTION, LABEL_TRAIN_JOB_COLLECTION, API_PORT, API_HOST, API_WORKER, SLEEP_INTERVAL_SECOND, ANACONDA_ENV_NAME, PATH, NER_ADAPTERS_TRAINER_NAME, NER_TRAINER_RUNNER_NAME
 from utils.trainer_communicate import update_pid
 
 update_pid(NER_TRAINER_RUNNER_NAME, os.getpid())
@@ -43,7 +43,9 @@ def run_trainer():
         try:
             trainer = config_col.find_one({
                 "name": NER_ADAPTERS_TRAINER_NAME
-            }, {"restart_required": True})
+            }, {
+                "restart_required": True
+            })
             if trainer["restart_required"]:
                 config_col.update_one({
                     "name": NER_ADAPTERS_TRAINER_NAME
@@ -51,6 +53,7 @@ def run_trainer():
                     "$set": {"restart_required": False}
                 })
                 return_status = "Trainer Restart Required."
+                time.sleep(3)
                 break
             try:
                 poll = process.poll()
@@ -59,22 +62,21 @@ def run_trainer():
                     return_status = f"Finish with code {poll}"
                 elif poll == 4:
                     return_status = f"Error with code {poll}, CUDA out of memory!"
-                    time.sleep(600) #if out of memory, don't keep try it...
+                    #time.sleep(600) #if out of memory, don't keep try it...
                 else:
                     return_status = f"Error with code {poll}"
                 #print(f"Process Stop Running, return code {poll}")
                 break
             except TypeError:
                 #print("Process Still Running")
-                #time.sleep(SLEEP_INTERVAL_SECOND)
-                time.sleep(3)
+                time.sleep(SLEEP_INTERVAL_SECOND)
+                #time.sleep(3)
                 continue
             
         except KeyboardInterrupt:
             print("KeyboardInterrupt, stop program")
             return_status = "KeyboardInterrupt"
             break
-
     trainer = config_col.find_one({
         "name": NER_ADAPTERS_TRAINER_NAME
     }, {"pid": True})
@@ -88,11 +90,11 @@ def run_trainer():
     print(f"Stop {NER_ADAPTERS_TRAINER_NAME} because {return_status}")
     return return_status
 
-training_queue_col = client[DATABASE_NAME][LABEL_RETRAIN_QUEUE_COLLECTION]
+training_job_col = client[DATABASE_NAME][LABEL_TRAIN_JOB_COLLECTION]
 while True:
     try:
         import re
-        result = training_queue_col.find({
+        result = training_job_col.find({
             "status":  re.compile("(training|waiting)")
         })
 
