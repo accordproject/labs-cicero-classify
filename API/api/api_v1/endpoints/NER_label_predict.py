@@ -21,7 +21,7 @@ class text_label_body(BaseModel):
 
 
 NER_LABEL_PREDICT_API_TAG = ["NER Label Predict"]
-@router.post("/model/label", tags = NER_LABEL_PREDICT_API_TAG, status_code=status.HTTP_200_OK)
+@router.post("/model/NER", tags = NER_LABEL_PREDICT_API_TAG, status_code=status.HTTP_200_OK)
 def text_label(data: text_label_body):
     sen, pred, logits, logits_order = adapter_model.predict(data.text)
     out_Tokens = []
@@ -41,7 +41,7 @@ def text_label(data: text_label_body):
         "prediction": out_Tokens
     }
 
-@router.get("/model/label", tags = NER_LABEL_PREDICT_API_TAG, status_code=status.HTTP_200_OK)
+@router.get("/model/NER", tags = NER_LABEL_PREDICT_API_TAG, status_code=status.HTTP_200_OK)
 def get_model_status():
     return {
         "message": "get success",
