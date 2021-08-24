@@ -20,5 +20,5 @@ router.include_router(suggestion_predict_router)
 from .endpoints.labeledText_api import router as labeledText_api_router
 router.include_router(labeledText_api_router)
 
-from .endpoints.label_training_queue import router as label_training_queue_router
-router.include_router(label_training_queue_router)
+from .endpoints.label_train import router as label_train_router
+router.include_router(label_train_router)

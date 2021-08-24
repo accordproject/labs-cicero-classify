@@ -12,7 +12,7 @@ JSONStructure = Union[JSONArray, JSONObject]
 
 router = APIRouter()
 
-TAG_OF_TEMPLATE_CLASSIFY_API = ["Template Classification"]
+TAG_OF_TEMPLATE_CLASSIFY_API = ["Predict"]
 
 from utils.template_classification import model
 class classify_template_body(BaseModel):
@@ -20,7 +20,7 @@ class classify_template_body(BaseModel):
     text = model.example_text
 
 
-@router.post("/models/templateClassify", tags = TAG_OF_TEMPLATE_CLASSIFY_API, status_code=status.HTTP_200_OK)
+@router.post("/models/classify/template", tags = TAG_OF_TEMPLATE_CLASSIFY_API, status_code=status.HTTP_200_OK)
 def classify_template(data: classify_template_body):
     predictions = model.classify(data.text)
     if data.return_max_size > 0:
@@ -32,7 +32,7 @@ def classify_template(data: classify_template_body):
 
 
 
-@router.get("/model/templateClassify", tags = TAG_OF_TEMPLATE_CLASSIFY_API, status_code=status.HTTP_200_OK)
+@router.get("/models/classify/template", tags = TAG_OF_TEMPLATE_CLASSIFY_API, status_code=status.HTTP_200_OK)
 def get_model_status():
     return {
         "message": "get success",

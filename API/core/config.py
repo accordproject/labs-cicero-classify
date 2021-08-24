@@ -33,9 +33,9 @@ NER_LABEL_COLLECTION = "labeled_dataset"
 Feedback_Template_Collection = "template_data_feedback"
 Feedback_Suggestion_Collection = "suggestion_data_feedback"
 LABEL_COLLECTION = "Labels"
-LABEL_RETRAIN_QUEUE_COLLECTION = "labels_retrain_queue"
+LABEL_TRAIN_JOB_COLLECTION = "NER_label_training_jobs"
 CONFIG_COLLECTION="config"
-SLEEP_INTERVAL_SECOND = 30
+SLEEP_INTERVAL_SECOND = 3
 
 TRAINER_LOG_COLLECTION = "trainer_log"
 
