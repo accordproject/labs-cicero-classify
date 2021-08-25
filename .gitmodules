@@ -7,3 +7,6 @@
 [submodule "datasets/entity-recognition-datasets"]
 	path = datasets/entity-recognition-datasets
 	url = https://github.com/juand-r/entity-recognition-datasets.git
+[submodule "API"]
+	path = API
+	url = git@github.com:EasonC13/labs-cicero-classify-api.git

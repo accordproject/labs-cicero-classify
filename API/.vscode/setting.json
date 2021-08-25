@@ -1,9 +1,0 @@
-{
-    "python.defaultInterpreterPath": "~/anaconda3/envs/adapter/bin/python",
-    "python.analysis.extraPaths": [
-        "/home/eason/anaconda3/envs/adapter/lib/python3.7/site-packages/"
-    ],
-    "python.autoComplete.extraPaths": [
-        "/home/eason/anaconda3/envs/adapter/lib/python3.7/site-packages/"
-    ]
-}
