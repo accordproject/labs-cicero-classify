@@ -10,3 +10,6 @@
 [submodule "API"]
 	path = API
 	url = git@github.com:EasonC13/labs-cicero-classify-api.git
+[submodule "labs-cicero-classify-api-setup-script"]
+	path = labs-cicero-classify-api-setup-script
+	url = https://github.com/EasonC13/labs-cicero-classify-api-setup-script.git
